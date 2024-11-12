@@ -25,4 +25,7 @@ do
     kill -9 $pid
 done
 
-kill -9 $parent_pid
+if [ "x$CURRENT_ENV" != "x" ]
+then
+    kill -9 $parent_pid
+fi
