@@ -1,0 +1,26 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set virtual_env_name [lindex $argv 0]
+set storage_dir      [lindex $argv 1]
+
+set user          [exec whoami]
+set default_shell [exec grep "^$user:" /etc/passwd | cut -d: -f7]
+
+set timeout -1
+
+spawn $default_shell
+
+expect "$user@*" {send "export CURRENT_ENV=$virtual_env_name\r"}
+expect "$user@*" {send "source $storage_dir/$virtual_env_name/bin/activate\r"}
+expect "$user@*" {send "touch $storage_dir/$$.pid\r"}
+expect "$user@*" {send "\r"}
+
+set filename "$storage_dir/$virtual_env_name.activate"
+set num [expr {[catch {open $filename "r"} file] ? 1 : [read $file] + 1}]
+set fileId [open $filename "w"]
+puts $fileId $num
+close $fileId
+
+interact

@@ -1,0 +1,52 @@
+#!/bin/bash
+SCRIPT_PATH=$(realpath "$0")
+SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
+SCRIPT_NAME=$(basename ${SCRIPT_PATH})
+
+# suported cmds
+cmds=(create list remove activate show deactivate clean)
+
+function usage()
+{
+    echo "Usage: $0 cmd [params] "
+    echo "Commands:"
+    echo "  create     - Creates a new virtual environment."
+    echo "  list       - Lists all virtual environment."
+    echo "  remove     - Removes a virtual environment."
+    echo "  activate   - Activates a virtual environment."
+    echo "  show       - Show active virtual environments."
+    echo "  deactivate - Deactivates the current virtual environment."
+    echo "  clean      - Deactivates all virtual environment."
+    echo "  help       - Displays this help message."
+    exit 1
+}
+
+# 动态生成 case 语句
+case_str=""
+for cmd in "${cmds[@]}"; do
+    case_str+="    $cmd)"
+    case_str+="        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh \"\${@:2}\"; control_var=1"
+    case_str+="        ;;"
+done
+
+if [ $# -eq 0 ]
+then
+    usage
+fi
+
+control_var=0
+while [ $# -ge 1 ] && [ $control_var -eq 0 ]
+do
+    cmd=$1
+    eval "case "$cmd" in
+        ${case_str}
+        help|-h|--help)
+            usage
+            ;;
+        *)
+            echo \"The command '$cmd' is not supported.\"
+            usage
+            ;;
+    esac"
+    shift
+done
