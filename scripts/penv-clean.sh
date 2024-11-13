@@ -7,7 +7,7 @@ pid_files=$(ls ${VENV_STORAGE_DIR}/*.pid 2>/dev/null)
 activate_files=$(ls ${VENV_STORAGE_DIR}/*.activate 2>/dev/null)
 
 parent_pid=$(ps -o ppid= -p $$)
-parent_pid=$(ps -o ppid= -p $parent_pid)
+parent_pid=$(echo $(ps -o ppid= -p $parent_pid) | cut -f2)
 
 for file in $activate_files
 do
