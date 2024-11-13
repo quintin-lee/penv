@@ -24,3 +24,10 @@ tar zcvf penv.tar.gz penv scripts
 
 make -si
 ```
+
+## 3. deb 打包
+
+```shell
+# 执行过程中需要输入 sudo 密码
+bash tools/make_deb.sh
+```
