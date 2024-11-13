@@ -1,6 +1,7 @@
 #!/usr/bin/expect -f
 
 log_user 0
+exp_internal 0
 
 set virtual_env_name [lindex $argv 0]
 set storage_dir      [lindex $argv 1]
@@ -15,8 +16,7 @@ spawn $default_shell
 expect "$user@*" {send "export CURRENT_ENV=$virtual_env_name\r"}
 expect "$user@*" {send "source $storage_dir/$virtual_env_name/bin/activate\r"}
 expect "$user@*" {send "touch $storage_dir/$$.pid\r"}
-expect "$user@*" {send "\r"}
-expect "$user@*" {send "\r"}
+expect "$user@*" {send "clear\r"}
 
 set filename "$storage_dir/$virtual_env_name.activate"
 set num [expr {[catch {open $filename "r"} file] ? 1 : [read $file] + 1}]
