@@ -26,12 +26,14 @@ if [ -d "${VENV_STORAGE_DIR}/$virtual_env_name" ]; then
     exit 1
 fi
 
-# 如果虚拟环境不存在，可以在这里添加创建虚拟环境的代码
-# 例如，使用 virtualenv 创建虚拟环境
+if ! command -v python3 &> /dev/null; then
+    echo "Error: Python3 is not installed."
+    exit 1
+fi
+
 echo "Creating virtual environment '$virtual_env_name'..."
 # 这里可以放置创建虚拟环境的命令
-
-python -m venv ${VENV_STORAGE_DIR}/$virtual_env_name
+python3 -m venv ${VENV_STORAGE_DIR}/$virtual_env_name
 
 echo "Virtual environment '$virtual_env_name' created successfully."
 echo "$description" > "${VENV_STORAGE_DIR}/$virtual_env_name/description.txt"
