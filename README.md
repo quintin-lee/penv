@@ -18,11 +18,7 @@ Commands:
 ## 2. archlinux/manjaro 打包
 
 ```shell
-git clone https://github.com/quintin-lee/penv.git
-
-tar zcvf penv.tar.gz penv scripts
-
-make -si
+bash tools/make_pkg.sh
 ```
 
 ## 3. deb 打包
