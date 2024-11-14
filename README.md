@@ -1,4 +1,4 @@
-# python venv 管理
+# Python3 venv 管理
 
 ## 1. 使用命令
 
@@ -27,3 +27,10 @@ bash tools/make_pkg.sh
 # 执行过程中需要输入 sudo 密码
 bash tools/make_deb.sh
 ```
+
+## 4. 安装
+
+To install the latest release, follow these steps:
+1. Go to the [Releases page](https://github.com/quintin-lee/penv/releases).
+2. Download the latest version.
+3. Install it using the provided instructions.
