@@ -16,6 +16,11 @@ for name in $(ls ${VENV_STORAGE_DIR}/ 2>/dev/null)
 do
     env_dir="${VENV_STORAGE_DIR}/${name}"
     description_file="${env_dir}/description.txt"
+
+    if [ ! -d "$env_dir" ]
+    then
+        continue
+    fi
     
     if [ -f "${description_file}" ]; then
         description=$(cat "${description_file}")

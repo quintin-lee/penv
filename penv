@@ -8,7 +8,7 @@ cmds=(create list remove activate show deactivate clean)
 
 function usage()
 {
-    echo "Usage: $0 cmd [params] "
+    echo "Usage: ${SCRIPT_NAME} cmd [params] "
     echo "Commands:"
     echo "  create     - Creates a new virtual environment."
     echo "  list       - Lists all virtual environment."
