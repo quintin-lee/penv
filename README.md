@@ -3,7 +3,7 @@
 ## 1. 使用命令
 
 ```shell
-Usage: /usr/local/bin/penv cmd [params] 
+Usage: penv cmd [params] 
 Commands:
   create     - Creates a new virtual environment.
   list       - Lists all virtual environment.
