@@ -22,7 +22,10 @@ do
     then
         continue
     fi
-    kill -9 $pid
+    if ps -p ${pid} > /dev/null 2>&1
+    then
+        kill -9 $pid
+    fi
 done
 
 if [ "x$CURRENT_ENV" != "x" ]
