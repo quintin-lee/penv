@@ -6,6 +6,7 @@ source ${SCRIPT_DIR}/env.sh
 # 初始化最大宽度
 max_name_width=0
 max_description_width=0
+max_version_width=20
 
 # 存储所有虚拟环境的名称和描述
 declare -A names
@@ -33,8 +34,9 @@ do
     descriptions[$name]=$description
     
     # 更新最大宽度
-    name_length=${#name}
-    description_length=${#description}
+    name_length=$(echo -n ${name} | wc -L)
+    #description_length=${#description}
+    description_length=$(echo -n ${description} | wc -L)
     
     if (( name_length > max_name_width )); then
         max_name_width=$name_length
@@ -46,12 +48,13 @@ do
 done
 
 # 打印表头
-printf "%-${max_name_width}s\t%-${max_description_width}s\n" "Name" "Description"
-printf "%-${max_name_width}s\t%-${max_description_width}s\n" "----" "-----------"
+printf "%-${max_name_width}s    %-${max_description_width}s    %-${max_version_width}s\n" "Name" "Description" "Python Version"
+printf "%-${max_name_width}s    %-${max_description_width}s    %-${max_version_width}s\n" "----" "-----------" "--------------"
 
 # 第二次遍历，打印对齐的输出
 for name in "${!names[@]}"
 do
+    version=$(${VENV_STORAGE_DIR}/$name/bin/python --version | cut -d' ' -f2)
     description=${descriptions[$name]}
-    printf "%-${max_name_width}s\t%-${max_description_width}s\n" "${name}" "${description}"
+    printf "%-${max_name_width}s    %-${max_description_width}s    %-${max_version_width}s\n" "${name}" "${description}" "${version}"
 done

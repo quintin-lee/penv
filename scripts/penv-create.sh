@@ -31,9 +31,34 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
+selected_python=""
+# 调用 select_python_version.sh 脚本并捕获输出
+while IF= read line
+do
+    if [[ -f ${line} ]]
+    then
+        selected_python=$line
+        continue
+    fi
+    if [[ -n $(echo ${line} | grep ':' | grep -v '^-') ]]
+    then
+        echo "   ${line}"
+        continue
+    fi
+    echo "$line"
+done < <(${SCRIPT_DIR}/select_version.sh)
+
+# 检查是否有选中的 Python 版本
+if [[ -n "$selected_python" ]]; then
+    cmd=$selected_python
+    # 可以在这里继续处理选中的 Python 版本
+else
+    cmd="python3"
+fi
+
 echo "Creating virtual environment '$virtual_env_name'..."
 # 这里可以放置创建虚拟环境的命令
-python3 -m venv ${VENV_STORAGE_DIR}/$virtual_env_name
+$cmd -m venv ${VENV_STORAGE_DIR}/$virtual_env_name
 
 echo "Virtual environment '$virtual_env_name' created successfully."
 echo "$description" > "${VENV_STORAGE_DIR}/$virtual_env_name/description.txt"
