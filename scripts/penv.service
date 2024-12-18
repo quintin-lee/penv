@@ -1,0 +1,10 @@
+[Unit]
+Description=Python venv manager
+After=network.target
+
+[Service]
+ExecStart=/usr/local/penv/scripts/auto-clean.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
