@@ -14,6 +14,9 @@ All notable changes to penv will be documented in this file.
 - Unified version numbers across all files to 0.1.1
 - Fixed syntax errors in the main script
 - Improved README.md with installation instructions, usage examples and troubleshooting guide
+- Unified variable naming convention across all scripts (using UPPER_CASE_WITH_UNDERSCORES)
+- Enhanced error handling in scripts with proper exit codes and error messages
+- Optimized environment listing to use single traversal instead of double traversal
 
 ## [0.1.0] - 2024-XX-XX
 
