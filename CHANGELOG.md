@@ -23,6 +23,7 @@ All notable changes to penv will be documented in this file.
 - Unified shell interpreter across all scripts to `#!/usr/bin/env bash` for better portability
 - Enhanced input validation for virtual environment names and command arguments
 - Added input validation to prevent special characters in environment names
+- Enhanced PKGBUILD with proper handling of new files and improved package metadata
 
 ## [0.1.0] - 2024-XX-XX
 
