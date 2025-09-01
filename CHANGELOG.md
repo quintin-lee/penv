@@ -24,6 +24,8 @@ All notable changes to penv will be documented in this file.
 - Enhanced input validation for virtual environment names and command arguments
 - Added input validation to prevent special characters in environment names
 - Enhanced PKGBUILD with proper handling of new files and improved package metadata
+- Enhanced list display with color coding, activation status and improved formatting
+- Fixed virtual environment activation path error issue
 
 ## [0.1.0] - 2024-XX-XX
 

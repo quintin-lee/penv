@@ -34,6 +34,15 @@ MAX_VERSION_WIDTH=20
 declare -A ENV_NAMES
 declare -A ENV_DESCRIPTIONS
 declare -a ENV_LIST
+declare -A ENV_PYTHON_VERSIONS
+declare -A ENV_ACTIVATED
+
+# Get currently activated environment
+CURRENT_ENV_FILE=$(ls ${VENV_STORAGE_DIR}/*.activate 2>/dev/null | head -n 1)
+CURRENT_ENV=""
+if [[ -n "$CURRENT_ENV_FILE" ]]; then
+    CURRENT_ENV=$(basename "$CURRENT_ENV_FILE" .activate)
+fi
 
 # Single traversal to collect environment info and determine column widths
 for env_name in $(ls ${VENV_STORAGE_DIR}/ 2>/dev/null)
@@ -51,6 +60,12 @@ do
         continue
     fi
     
+    # Check if environment is activated
+    ACTIVATED=false
+    if [ -f "${VENV_STORAGE_DIR}/${env_name}.activate" ]; then
+        ACTIVATED=true
+    fi
+    
     # Read description if available
     if [ -f "${DESCRIPTION_FILE}" ]; then
         DESCRIPTION=$(cat "${DESCRIPTION_FILE}" 2>/dev/null)
@@ -61,14 +76,23 @@ do
         DESCRIPTION=""
     fi
     
-    # Store name and description
+    # Get Python version
+    PYTHON_VERSION=$(${VENV_STORAGE_DIR}/$env_name/bin/python --version 2>/dev/null | cut -d' ' -f2)
+    if [ -z "$PYTHON_VERSION" ]; then
+        PYTHON_VERSION="Unknown"
+    fi
+    
+    # Store name, description, version and activation status
     ENV_NAMES[$env_name]=$env_name
     ENV_DESCRIPTIONS[$env_name]=$DESCRIPTION
+    ENV_PYTHON_VERSIONS[$env_name]=$PYTHON_VERSION
+    ENV_ACTIVATED[$env_name]=$ACTIVATED
     ENV_LIST+=($env_name)
     
     # Update maximum width
     NAME_LENGTH=$(echo -n ${env_name} | wc -L)
     DESCRIPTION_LENGTH=$(echo -n ${DESCRIPTION} | wc -L)
+    VERSION_LENGTH=$(echo -n ${PYTHON_VERSION} | wc -L)
     
     if (( NAME_LENGTH > MAX_NAME_WIDTH )); then
         MAX_NAME_WIDTH=$NAME_LENGTH
@@ -76,6 +100,10 @@ do
     
     if (( DESCRIPTION_LENGTH > MAX_DESCRIPTION_WIDTH )); then
         MAX_DESCRIPTION_WIDTH=$DESCRIPTION_LENGTH
+    fi
+    
+    if (( VERSION_LENGTH > MAX_VERSION_WIDTH )); then
+        MAX_VERSION_WIDTH=$VERSION_LENGTH
     fi
 done
 
@@ -102,19 +130,35 @@ fi
 
 unset IFS
 
-# Print header
-printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s\n" "Name" "Description" "Python Version"
-printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s\n" "----" "-----------" "--------------"
+# Print header with enhanced formatting
+echo "Virtual environments in '${VENV_STORAGE_DIR}':"
+echo
 
-# Print sorted environments with aligned output
+# Print table header
+printf "\033[1m%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\033[0m\n" "Name" "Description" "Python Version" "Status"
+printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\n" "$(printf '%*s' $MAX_NAME_WIDTH | tr ' ' '-')" "-----------" "--------------" "------"
+
+# Print sorted environments with aligned output and status indicators
 for env_name in "${ENV_LIST[@]}"
 do
-    # Get Python version, handle errors gracefully
-    PYTHON_VERSION=$(${VENV_STORAGE_DIR}/$env_name/bin/python --version 2>/dev/null | cut -d' ' -f2)
-    if [ -z "$PYTHON_VERSION" ]; then
-        PYTHON_VERSION="Unknown"
-    fi
-    
     DESCRIPTION=${ENV_DESCRIPTIONS[$env_name]}
-    printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s\n" "${env_name}" "${DESCRIPTION}" "${PYTHON_VERSION}"
+    PYTHON_VERSION=${ENV_PYTHON_VERSIONS[$env_name]}
+    ACTIVATED=${ENV_ACTIVATED[$env_name]}
+    
+    # Determine status display
+    if [ "$ACTIVATED" = true ]; then
+        STATUS="Active"
+        # Print active environments in green
+        printf "\033[32m%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\033[0m\n" "${env_name}" "${DESCRIPTION}" "${PYTHON_VERSION}" "${STATUS}"
+    else
+        STATUS="Inactive"
+        # Print inactive environments in default color
+        printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\n" "${env_name}" "${DESCRIPTION}" "${PYTHON_VERSION}" "${STATUS}"
+    fi
 done
+
+echo
+echo "Total: ${#ENV_LIST[@]} virtual environments"
+if [[ -n "$CURRENT_ENV" ]]; then
+    echo "Currently active: ${CURRENT_ENV}"
+fi

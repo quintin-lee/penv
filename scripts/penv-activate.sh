@@ -28,4 +28,4 @@ then
 fi
 
 # Activate virtual environment
-expect ${SCRIPT_DIR}/activate.exp ${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME $VIRTUAL_ENV_NAME
+expect ${SCRIPT_DIR}/activate.exp $VIRTUAL_ENV_NAME ${VENV_STORAGE_DIR}
