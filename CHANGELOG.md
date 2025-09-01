@@ -9,6 +9,9 @@ All notable changes to penv will be documented in this file.
 - Enhanced help information with detailed usage examples
 - Optimized list output to display virtual environments sorted by name
 - Added CHANGELOG.md file to record version change history
+- Enhanced help system with command-specific help (`penv help <command>`)
+- Added bash auto-completion support
+- Improved list functionality with sorting and filtering options
 
 ### Changed
 - Unified version numbers across all files to 0.1.1
@@ -17,6 +20,9 @@ All notable changes to penv will be documented in this file.
 - Unified variable naming convention across all scripts (using UPPER_CASE_WITH_UNDERSCORES)
 - Enhanced error handling in scripts with proper exit codes and error messages
 - Optimized environment listing to use single traversal instead of double traversal
+- Unified shell interpreter across all scripts to `#!/usr/bin/env bash` for better portability
+- Enhanced input validation for virtual environment names and command arguments
+- Added input validation to prevent special characters in environment names
 
 ## [0.1.0] - 2024-XX-XX
 

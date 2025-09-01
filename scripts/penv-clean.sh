@@ -1,34 +1,34 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
 
-pid_files=$(ls ${VENV_STORAGE_DIR}/*.pid 2>/dev/null)
-activate_files=$(ls ${VENV_STORAGE_DIR}/*.activate 2>/dev/null)
+PID_FILES=$(ls ${VENV_STORAGE_DIR}/*.pid 2>/dev/null)
+ACTIVATE_FILES=$(ls ${VENV_STORAGE_DIR}/*.activate 2>/dev/null)
 
-parent_pid=$(ps -o ppid= -p $$)
-parent_pid=$(echo $(ps -o ppid= -p $parent_pid) | cut -f2)
+PARENT_PID=$(ps -o ppid= -p $$)
+PARENT_PID=$(echo $(ps -o ppid= -p $PARENT_PID) | cut -f2)
 
-for file in $activate_files
+for file in $ACTIVATE_FILES
 do
     rm -f $file
 done
 
-for file in $pid_files
+for file in $PID_FILES
 do
-    pid=$(echo $(basename $file) | cut -d'.' -f 1)
+    PID=$(echo $(basename $file) | cut -d'.' -f 1)
     rm -f $file
-    if [ "x"$pid = "x"$parent_pid ]
+    if [ "x"$PID = "x"$PARENT_PID ]
     then
         continue
     fi
-    if ps -p ${pid} > /dev/null 2>&1
+    if ps -p ${PID} > /dev/null 2>&1
     then
-        kill -9 $pid
+        kill -9 $PID
     fi
 done
 
 if [ "x$CURRENT_ENV" != "x" ]
 then
-    kill -9 $parent_pid
+    kill -9 $PARENT_PID
 fi

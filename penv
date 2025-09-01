@@ -16,7 +16,7 @@ function usage()
     echo "  create        Creates a new virtual environment."
     echo "                Usage: penv create <env_name> [description]"
     echo "  list          Lists all virtual environments."
-    echo "                Usage: penv list"
+    echo "                Usage: penv list [--sort-by=name|date]"
     echo "  remove        Removes a virtual environment."
     echo "                Usage: penv remove <env_name>"
     echo "  activate      Activates a virtual environment."
@@ -28,14 +28,18 @@ function usage()
     echo "  clean         Deactivates all virtual environments."
     echo "                Usage: penv clean"
     echo "  help, -h, --help    Displays this help message."
+    echo "                Usage: penv help [command]"
     echo "  --version     Display version information."
     echo ""
     echo "Examples:"
     echo "  penv create myproject \"My Python project\""
     echo "  penv list"
+    echo "  penv list --sort-by=date"
     echo "  penv activate myproject"
     echo "  penv deactivate"
     echo "  penv remove myproject"
+    echo ""
+    echo "For command-specific help, use: penv help <command>"
     exit 1
 }
 
@@ -43,6 +47,95 @@ function version()
 {
     echo "${SCRIPT_NAME} version ${VERSION}"
     exit 0
+}
+
+function command_help()
+{
+    if [ $# -eq 0 ]; then
+        usage
+        return
+    fi
+
+    local cmd=$1
+    case "$cmd" in
+        create)
+            echo "Usage: penv create <env_name> [description]"
+            echo ""
+            echo "Creates a new Python virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name      Name of the virtual environment to create"
+            echo "  description   Optional description for the environment"
+            echo ""
+            echo "Example:"
+            echo "  penv create myproject \"My Python project\""
+            ;;
+        list)
+            echo "Usage: penv list [--sort-by=name|date] [--filter=pattern]"
+            echo ""
+            echo "Lists all Python virtual environments."
+            echo ""
+            echo "Options:"
+            echo "  --sort-by=name|date   Sort environments by name (default) or creation date"
+            echo "  --filter=pattern      Filter environments by name pattern"
+            echo ""
+            echo "Examples:"
+            echo "  penv list"
+            echo "  penv list --sort-by=date"
+            echo "  penv list --filter=test"
+            ;;
+        remove)
+            echo "Usage: penv remove <env_name>"
+            echo ""
+            echo "Removes a Python virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name      Name of the virtual environment to remove"
+            echo ""
+            echo "Example:"
+            echo "  penv remove myproject"
+            ;;
+        activate)
+            echo "Usage: penv activate <env_name>"
+            echo ""
+            echo "Activates a Python virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name      Name of the virtual environment to activate"
+            echo ""
+            echo "Example:"
+            echo "  penv activate myproject"
+            ;;
+        show)
+            echo "Usage: penv show"
+            echo ""
+            echo "Shows currently active virtual environments."
+            echo ""
+            echo "Example:"
+            echo "  penv show"
+            ;;
+        deactivate)
+            echo "Usage: penv deactivate"
+            echo ""
+            echo "Deactivates the currently active virtual environment."
+            echo ""
+            echo "Example:"
+            echo "  penv deactivate"
+            ;;
+        clean)
+            echo "Usage: penv clean"
+            echo ""
+            echo "Deactivates all active virtual environments."
+            echo ""
+            echo "Example:"
+            echo "  penv clean"
+            ;;
+        *)
+            echo "Unknown command: $cmd"
+            echo "Use 'penv help' to see available commands."
+            ;;
+    esac
+    exit 1
 }
 
 if [ $# -eq 0 ]
@@ -74,7 +167,11 @@ case "$cmd" in
         ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
         ;;
     help|-h|--help)
-        usage
+        if [ $# -gt 1 ]; then
+            command_help "${@:2}"
+        else
+            usage
+        fi
         ;;
     --version)
         version

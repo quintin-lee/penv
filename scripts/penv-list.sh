@@ -1,7 +1,29 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
+
+# Default values
+SORT_BY="name"
+FILTER_PATTERN=""
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --sort-by=*)
+            SORT_BY="${1#*=}"
+            ;;
+        --filter=*)
+            FILTER_PATTERN="${1#*=}"
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: penv list [--sort-by=name|date] [--filter=pattern]"
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Initialize maximum width
 MAX_NAME_WIDTH=4        # Minimum width for "Name"
@@ -16,6 +38,11 @@ declare -a ENV_LIST
 # Single traversal to collect environment info and determine column widths
 for env_name in $(ls ${VENV_STORAGE_DIR}/ 2>/dev/null)
 do
+    # Apply filter if specified
+    if [[ -n "$FILTER_PATTERN" ]] && [[ ! "$env_name" =~ $FILTER_PATTERN ]]; then
+        continue
+    fi
+
     ENV_DIR="${VENV_STORAGE_DIR}/${env_name}"
     DESCRIPTION_FILE="${ENV_DIR}/description.txt"
 
@@ -54,12 +81,25 @@ done
 
 # If no virtual environments found, show message
 if [ ${#ENV_LIST[@]} -eq 0 ]; then
-    echo "No virtual environments found."
+    if [[ -n "$FILTER_PATTERN" ]]; then
+        echo "No virtual environments found matching pattern: $FILTER_PATTERN"
+    else
+        echo "No virtual environments found."
+    fi
     exit 0
 fi
 
 # Sort environment names
-IFS=$'\n' ENV_LIST=($(sort <<<"${ENV_LIST[*]}"))
+if [[ "$SORT_BY" == "date" ]]; then
+    # Sort by creation date (oldest first)
+    IFS=$'\n' ENV_LIST=($(for env in "${ENV_LIST[@]}"; do
+        echo "$(stat -c %Y ${VENV_STORAGE_DIR}/${env}) $env"
+    done | sort -n | cut -d' ' -f2-))
+else
+    # Sort by name (default)
+    IFS=$'\n' ENV_LIST=($(sort <<<"${ENV_LIST[*]}"))
+fi
+
 unset IFS
 
 # Print header

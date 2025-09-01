@@ -1,35 +1,34 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
 
-# 使用 ps 命令获取父进程的 PID
-parent_pid=$(ps -o ppid= -p $$)
-parent_pid=$(echo $(ps -o ppid= -p $parent_pid) | cut -f2)
+# Use ps command to get the parent process PID
+PARENT_PID=$(ps -o ppid= -p $$)
+PARENT_PID=$(echo $(ps -o ppid= -p $PARENT_PID) | cut -f2)
 
 if [ "x$CURRENT_ENV" != "x" ]
 then
-    file=${VENV_STORAGE_DIR}/${CURRENT_ENV}.activate
-    if [ -f "${file}" ]
+    FILE=${VENV_STORAGE_DIR}/${CURRENT_ENV}.activate
+    if [ -f "${FILE}" ]
     then
-        num=$(cat $file)
-        num=$(($num - 1))
-        if [ $num -eq 0 ]
+        NUM=$(cat $FILE)
+        NUM=$(($NUM - 1))
+        if [ $NUM -eq 0 ]
         then
-            rm -f $file
+            rm -f $FILE
         else
-            echo "$num" > $file
+            echo "$NUM" > $FILE
         fi
     fi
 
-    pid_file=${VENV_STORAGE_DIR}/${parent_pid}.pid
-    # pid 文件
-    if [ -f "${pid_file}" ]
+    PID_FILE=${VENV_STORAGE_DIR}/${PARENT_PID}.pid
+    # pid file
+    if [ -f "${PID_FILE}" ]
     then
-        rm -f ${VENV_STORAGE_DIR}/${parent_pid}.pid
-        kill -9 $parent_pid
+        rm -f ${VENV_STORAGE_DIR}/${PARENT_PID}.pid
+        kill -9 $PARENT_PID
     fi
 else
     exit 1
 fi
-

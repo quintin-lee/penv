@@ -28,6 +28,25 @@ bash tools/make_deb.sh
 1. Clone or download this repository
 2. Add the [penv](file:///home/quintin/workspace/source/shell/python-venv/penv) script to your PATH, or run it directly with `./penv`
 
+### Enable Command Completion
+
+To enable command completion for bash, add the following line to your `~/.bashrc`:
+
+```bash
+source /path/to/penv/scripts/penv-completion.bash
+```
+
+Replace `/path/to/penv` with the actual path to your penv installation.
+
+For zsh users, add the following to your `~/.zshrc`:
+
+```bash
+autoload -Uz compinit bashcompinit
+compinit
+bashcompinit
+source /path/to/penv/scripts/penv-completion.bash
+```
+
 ## Usage
 
 ```shell
@@ -39,7 +58,7 @@ Commands:
   create        Creates a new virtual environment.
                 Usage: penv create <env_name> [description]
   list          Lists all virtual environments.
-                Usage: penv list
+                Usage: penv list [--sort-by=name|date] [--filter=pattern]
   remove        Removes a virtual environment.
                 Usage: penv remove <env_name>
   activate      Activates a virtual environment.
@@ -51,11 +70,13 @@ Commands:
   clean         Deactivates all virtual environments.
                 Usage: penv clean
   help, -h, --help    Displays this help message.
+                Usage: penv help [command]
   --version     Display version information.
 
 Examples:
   penv create myproject "My Python project"
   penv list
+  penv list --sort-by=date
   penv activate myproject
   penv deactivate
   penv remove myproject
@@ -77,6 +98,12 @@ penv create myproject "My Python project"
 
 ```shell
 penv list
+
+# List environments sorted by creation date
+penv list --sort-by=date
+
+# List environments matching a pattern
+penv list --filter=test
 ```
 
 ### Activate a Virtual Environment
@@ -107,6 +134,14 @@ penv remove myproject
 
 ```shell
 penv clean
+```
+
+### Get Help for Specific Commands
+
+```shell
+penv help create
+penv help list
+penv help remove
 ```
 
 ## Troubleshooting Guide
