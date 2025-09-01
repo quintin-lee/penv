@@ -3,62 +3,77 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
 
+# Ensure virtual environment storage directory exists
 if [ ! -d "${VENV_STORAGE_DIR}" ]; then
     mkdir -p ${VENV_STORAGE_DIR}
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to create virtual environment storage directory '${VENV_STORAGE_DIR}'."
+        exit 1
+    fi
 fi
 
+# Check arguments
 if [ $# -lt 2 ]; then
     echo "Error: No virtual environment name or description provided."
     echo "Usage: $0 <virtual_env_name> <description>"
     exit 1
 fi
 
-all_args=("$@")
+ALL_ARGS=("$@")
 
-# 虚拟环境名称
-virtual_env_name=${all_args[0]}
-# 描述信息
-description="${all_args[1]}"
+# Virtual environment name
+VIRTUAL_ENV_NAME=${ALL_ARGS[0]}
+# Description information
+DESCRIPTION="${ALL_ARGS[1]}"
 
-# 检查虚拟环境是否存在
-if [ -d "${VENV_STORAGE_DIR}/$virtual_env_name" ]; then
-    echo "Error: Virtual environment '$virtual_env_name' already exists."
+# Check if virtual environment already exists
+if [ -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]; then
+    echo "Error: Virtual environment '$VIRTUAL_ENV_NAME' already exists."
     exit 1
 fi
 
+# Check if Python3 is installed
 if ! command -v python3 &> /dev/null; then
     echo "Error: Python3 is not installed."
     exit 1
 fi
 
-selected_python=""
-# 调用 select_python_version.sh 脚本并捕获输出
-while IF= read line
+SELECTED_PYTHON=""
+# Call select_python_version.sh script and capture output
+while IFS= read -r LINE
 do
-    if [[ -f ${line} ]]
+    if [[ -f ${LINE} ]]
     then
-        selected_python=$line
+        SELECTED_PYTHON=$LINE
         continue
     fi
-    if [[ -n $(echo ${line} | grep ':' | grep -v '^-') ]]
+    if [[ -n $(echo ${LINE} | grep ':' | grep -v '^-') ]]
     then
-        echo "   ${line}"
+        echo "   ${LINE}"
         continue
     fi
-    echo "$line"
+    echo "$LINE"
 done < <(${SCRIPT_DIR}/select_version.sh)
 
-# 检查是否有选中的 Python 版本
-if [[ -n "$selected_python" ]]; then
-    cmd=$selected_python
-    # 可以在这里继续处理选中的 Python 版本
+# Check if a Python version was selected
+if [[ -n "$SELECTED_PYTHON" ]]; then
+    CMD=$SELECTED_PYTHON
+    # Can continue processing the selected Python version here
 else
-    cmd="python3"
+    CMD="python3"
 fi
 
-echo "Creating virtual environment '$virtual_env_name'..."
-# 这里可以放置创建虚拟环境的命令
-$cmd -m venv ${VENV_STORAGE_DIR}/$virtual_env_name
+echo "Creating virtual environment '$VIRTUAL_ENV_NAME'..."
+# Create the virtual environment
+$CMD -m venv ${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create virtual environment '$VIRTUAL_ENV_NAME'."
+    exit 1
+fi
 
-echo "Virtual environment '$virtual_env_name' created successfully."
-echo "$description" > "${VENV_STORAGE_DIR}/$virtual_env_name/description.txt"
+echo "$DESCRIPTION" > "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME/description.txt"
+if [ $? -ne 0 ]; then
+    echo "Warning: Failed to write description to virtual environment."
+fi
+
+echo "Virtual environment '$VIRTUAL_ENV_NAME' created successfully."

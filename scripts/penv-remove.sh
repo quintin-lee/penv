@@ -4,18 +4,26 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
 
+# Check arguments
 if [ $# -eq 0 ]
 then
     echo "Warning: Please specify the virtual environment to remove."
     exit 1
 fi
 
-virtual_env_name=$1
+VIRTUAL_ENV_NAME=$1
 
-if [ -d "${VENV_STORAGE_DIR}/$virtual_env_name" ]
+# Check if virtual environment exists and remove it
+if [ -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]
 then
-    rm -rf ${VENV_STORAGE_DIR}/$virtual_env_name
-    echo "Virtual environment '$virtual_env_name' has been successfully deleted."
+    rm -rf ${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME
+    if [ $? -eq 0 ]; then
+        echo "Virtual environment '$VIRTUAL_ENV_NAME' has been successfully deleted."
+    else
+        echo "Error: Failed to delete virtual environment '$VIRTUAL_ENV_NAME'."
+        exit 1
+    fi
 else
-    echo "Error: Virtual environment '$virtual_env_name' does not exists."
+    echo "Error: Virtual environment '$VIRTUAL_ENV_NAME' does not exists."
+    exit 1
 fi

@@ -13,7 +13,7 @@ SERVICE_DIR=${DIST_DIR}/etc/systemd/system
 [ ! -d ${DEBIAN_DIR} ] && mkdir -p $DEBIAN_DIR
 [ ! -d ${BIN_DIR} ] && mkdir -p $BIN_DIR
 [ ! -d ${OPT_DIR} ] && mkdir -p $OPT_DIR
-[ ! -d ${SERVICE_DIR} && mkdir -p $SERVICE_DIR ]
+[ ! -d ${SERVICE_DIR} ] && mkdir -p $SERVICE_DIR
 
 # copy files to dist
 cp ${SCRIPT_DIR}/penv ${OPT_DIR}

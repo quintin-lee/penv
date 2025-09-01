@@ -3,50 +3,84 @@ SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
 SCRIPT_NAME=$(basename ${SCRIPT_PATH})
 
-# suported cmds
-cmds=(create list remove activate show deactivate clean)
+# Version information
+VERSION="0.1.1"
 
 function usage()
 {
-    echo "Usage: ${SCRIPT_NAME} cmd [params] "
+    echo "Usage: ${SCRIPT_NAME} cmd [params]"
+    echo ""
+    echo "Python virtual environment management tool."
+    echo ""
     echo "Commands:"
-    echo "  create     - Creates a new virtual environment."
-    echo "  list       - Lists all virtual environment."
-    echo "  remove     - Removes a virtual environment."
-    echo "  activate   - Activates a virtual environment."
-    echo "  show       - Show active virtual environments."
-    echo "  deactivate - Deactivates the current virtual environment."
-    echo "  clean      - Deactivates all virtual environment."
-    echo "  help       - Displays this help message."
+    echo "  create        Creates a new virtual environment."
+    echo "                Usage: penv create <env_name> [description]"
+    echo "  list          Lists all virtual environments."
+    echo "                Usage: penv list"
+    echo "  remove        Removes a virtual environment."
+    echo "                Usage: penv remove <env_name>"
+    echo "  activate      Activates a virtual environment."
+    echo "                Usage: penv activate <env_name>"
+    echo "  show          Show active virtual environments."
+    echo "                Usage: penv show"
+    echo "  deactivate    Deactivates the current virtual environment."
+    echo "                Usage: penv deactivate"
+    echo "  clean         Deactivates all virtual environments."
+    echo "                Usage: penv clean"
+    echo "  help, -h, --help    Displays this help message."
+    echo "  --version     Display version information."
+    echo ""
+    echo "Examples:"
+    echo "  penv create myproject \"My Python project\""
+    echo "  penv list"
+    echo "  penv activate myproject"
+    echo "  penv deactivate"
+    echo "  penv remove myproject"
     exit 1
 }
 
-# 动态生成 case 语句
-case_str=""
-for cmd in "${cmds[@]}"; do
-    case_str+="    $cmd)"
-    case_str+="        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh \"\${@:2}\"; control_var=1"
-    case_str+="        ;;"
-done
+function version()
+{
+    echo "${SCRIPT_NAME} version ${VERSION}"
+    exit 0
+}
 
 if [ $# -eq 0 ]
 then
     usage
 fi
 
-control_var=0
-while [ $# -ge 1 ] && [ $control_var -eq 0 ]
-do
-    cmd=$1
-    eval "case "$cmd" in
-        ${case_str}
-        help|-h|--help)
-            usage
-            ;;
-        *)
-            echo \"The command '$cmd' is not supported.\"
-            usage
-            ;;
-    esac"
-    shift
-done
+cmd=$1
+case "$cmd" in
+    create)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    list)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    remove)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    activate)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    show)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    deactivate)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    clean)
+        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+        ;;
+    help|-h|--help)
+        usage
+        ;;
+    --version)
+        version
+        ;;
+    *)
+        echo "The command '$cmd' is not supported."
+        usage
+        ;;
+esac

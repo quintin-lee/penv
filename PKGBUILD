@@ -1,5 +1,5 @@
 pkgname="penv"
-pkgver="0.1"
+pkgver="0.1.1"
 pkgrel=2
 pkgdesc="Manager Python venv in your terminal!"
 arch=("any")
@@ -24,4 +24,3 @@ package() {
     systemctl start penv
     systemctl enable penv
 }
-
