@@ -2,6 +2,27 @@
 
 All notable changes to penv will be documented in this file.
 
+## [0.1.2] - 2025-12-17
+
+### Added
+- Enhanced security with improved input validation across all scripts
+- Added timeout mechanisms to prevent hanging operations in environment listing and Python version selection
+- Added safety checks for directory operations in environment removal
+- Improved error reporting with more descriptive messages
+- Added signal trapping for graceful shutdowns in auto-clean script
+
+### Changed
+- Fixed syntax errors in penv-list.sh and penv-show.sh scripts related to redirection
+- Improved performance by replacing `ls` commands with safer globbing patterns in penv-list.sh
+- Replaced external commands with bash parameter expansion for better performance
+- Enhanced terminal compatibility for arrow key detection in Python version selection
+- Standardized all shebangs to `#!/usr/bin/env bash` for better cross-platform compatibility
+- Improved file iteration methods with safer array-based approaches
+- Translated Chinese comments to English in select_version.sh for better maintainability
+- Enhanced bash completion with additional options and timeout handling
+- Improved validation and error handling across all scripts
+- Used proper quoting for all variables to prevent injection issues
+
 ## [0.1.1] - 2025-09-01
 
 ### Added

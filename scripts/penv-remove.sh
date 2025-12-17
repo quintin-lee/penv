@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-source ${SCRIPT_DIR}/env.sh
+source "${SCRIPT_DIR}/env.sh"
 
 # Check arguments
 if [ $# -eq 0 ]
@@ -23,12 +23,17 @@ fi
 # Check if virtual environment exists and remove it
 if [ -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]
 then
-    echo "Removing virtual environment '$VIRTUAL_ENV_NAME'..."
-    rm -rf ${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME
-    if [ $? -eq 0 ]; then
-        echo "Virtual environment '$VIRTUAL_ENV_NAME' has been successfully deleted."
+    # Additional safety check to ensure we're only removing legitimate venv directories
+    if [[ "${VENV_STORAGE_DIR}" == *"/.cache/python-venv" || "${VENV_STORAGE_DIR}" == "$HOME"* ]]; then
+        echo "Removing virtual environment '$VIRTUAL_ENV_NAME'..."
+        if rm -rf "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME"; then
+            echo "Virtual environment '$VIRTUAL_ENV_NAME' has been successfully deleted."
+        else
+            echo "Error: Failed to delete virtual environment '$VIRTUAL_ENV_NAME'."
+            exit 1
+        fi
     else
-        echo "Error: Failed to delete virtual environment '$VIRTUAL_ENV_NAME'."
+        echo "Error: Safety check failed. VENV_STORAGE_DIR appears to be misconfigured."
         exit 1
     fi
 else

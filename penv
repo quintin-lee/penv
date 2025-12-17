@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
 SCRIPT_NAME=$(basename ${SCRIPT_PATH})
 
 # Version information
-VERSION="0.1.1"
+VERSION="0.1.2"
 
 function usage()
 {
@@ -145,26 +145,14 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    list)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    remove)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    activate)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    show)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    deactivate)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
-        ;;
-    clean)
-        ${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh "${@:2}"
+    create|list|remove|activate|show|deactivate|clean)
+        script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
+        if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
+            "$script_path" "${@:2}"
+        else
+            echo "Error: Command script '$script_path' not found or not executable." >&2
+            exit 1
+        fi
         ;;
     help|-h|--help)
         if [ $# -gt 1 ]; then

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-source ${SCRIPT_DIR}/env.sh
+source "${SCRIPT_DIR}/env.sh"
 
 # Check arguments
 if [ $# -eq 0 ]
@@ -27,5 +27,5 @@ then
     exit 1
 fi
 
-# Activate virtual environment
-expect ${SCRIPT_DIR}/activate.exp $VIRTUAL_ENV_NAME ${VENV_STORAGE_DIR}
+# Activate virtual environment - properly quote arguments to prevent injection
+expect "${SCRIPT_DIR}/activate.exp" "$VIRTUAL_ENV_NAME" "${VENV_STORAGE_DIR}"

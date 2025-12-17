@@ -178,4 +178,12 @@ If you encounter other issues:
 
 ## Version History
 
-See [CHANGELOG.md](file:///home/quintin/workspace/source/shell/python-venv/CHANGELOG.md) for version change history.
+### Current Version
+**0.1.2** - Released on 2025-12-17
+- Enhanced security with improved input validation
+- Better performance with optimized file operations
+- Improved stability with better error handling
+- Enhanced terminal compatibility
+- Standardized for better cross-platform support
+
+See [CHANGELOG.md](file:///home/quintin/workspace/source/shell/python-venv/CHANGELOG.md) for complete version change history.

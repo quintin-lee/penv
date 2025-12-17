@@ -45,14 +45,21 @@ if [[ -n "$CURRENT_ENV_FILE" ]]; then
 fi
 
 # Single traversal to collect environment info and determine column widths
-for env_name in $(ls ${VENV_STORAGE_DIR}/ 2>/dev/null)
+for env_dir_path in "${VENV_STORAGE_DIR}"/*/
 do
+    # Skip if no matches found - suppress error if no directories match
+    if [[ -d "$env_dir_path" ]]; then
+        env_name=$(basename "$env_dir_path")
+    else
+        continue
+    fi
+
     # Apply filter if specified
     if [[ -n "$FILTER_PATTERN" ]] && [[ ! "$env_name" =~ $FILTER_PATTERN ]]; then
         continue
     fi
 
-    ENV_DIR="${VENV_STORAGE_DIR}/${env_name}"
+    ENV_DIR="$env_dir_path"
     DESCRIPTION_FILE="${ENV_DIR}/description.txt"
 
     if [ ! -d "$ENV_DIR" ]
@@ -65,7 +72,7 @@ do
     if [ -f "${VENV_STORAGE_DIR}/${env_name}.activate" ]; then
         ACTIVATED=true
     fi
-    
+
     # Read description if available
     if [ -f "${DESCRIPTION_FILE}" ]; then
         DESCRIPTION=$(cat "${DESCRIPTION_FILE}" 2>/dev/null)
@@ -75,33 +82,33 @@ do
     else
         DESCRIPTION=""
     fi
-    
-    # Get Python version
-    PYTHON_VERSION=$(${VENV_STORAGE_DIR}/$env_name/bin/python --version 2>/dev/null | cut -d' ' -f2)
+
+    # Get Python version with timeout to prevent hanging
+    PYTHON_VERSION=$(timeout 5s "${VENV_STORAGE_DIR}/${env_name}/bin/python" --version 2>/dev/null | cut -d' ' -f2)
     if [ -z "$PYTHON_VERSION" ]; then
         PYTHON_VERSION="Unknown"
     fi
-    
+
     # Store name, description, version and activation status
     ENV_NAMES[$env_name]=$env_name
     ENV_DESCRIPTIONS[$env_name]=$DESCRIPTION
     ENV_PYTHON_VERSIONS[$env_name]=$PYTHON_VERSION
     ENV_ACTIVATED[$env_name]=$ACTIVATED
     ENV_LIST+=($env_name)
-    
+
     # Update maximum width
-    NAME_LENGTH=$(echo -n ${env_name} | wc -L)
-    DESCRIPTION_LENGTH=$(echo -n ${DESCRIPTION} | wc -L)
-    VERSION_LENGTH=$(echo -n ${PYTHON_VERSION} | wc -L)
-    
+    NAME_LENGTH=${#env_name}
+    DESCRIPTION_LENGTH=${#DESCRIPTION}
+    VERSION_LENGTH=${#PYTHON_VERSION}
+
     if (( NAME_LENGTH > MAX_NAME_WIDTH )); then
         MAX_NAME_WIDTH=$NAME_LENGTH
     fi
-    
+
     if (( DESCRIPTION_LENGTH > MAX_DESCRIPTION_WIDTH )); then
         MAX_DESCRIPTION_WIDTH=$DESCRIPTION_LENGTH
     fi
-    
+
     if (( VERSION_LENGTH > MAX_VERSION_WIDTH )); then
         MAX_VERSION_WIDTH=$VERSION_LENGTH
     fi

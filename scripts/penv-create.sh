@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source ${SCRIPT_DIR}/env.sh
@@ -13,18 +13,23 @@ if [ ! -d "${VENV_STORAGE_DIR}" ]; then
 fi
 
 # Check arguments
-if [ $# -lt 2 ]; then
-    echo "Error: No virtual environment name or description provided."
-    echo "Usage: $0 <virtual_env_name> <description>"
+if [ $# -lt 1 ]; then
+    echo "Error: No virtual environment name provided."
+    echo "Usage: $0 <virtual_env_name> [description]"
     exit 1
 fi
 
-ALL_ARGS=("$@")
-
 # Virtual environment name
-VIRTUAL_ENV_NAME=${ALL_ARGS[0]}
-# Description information
-DESCRIPTION="${ALL_ARGS[1]}"
+VIRTUAL_ENV_NAME=$1
+
+# Validate virtual environment name (no special characters except - and _)
+if [[ ! "$VIRTUAL_ENV_NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "Error: Invalid virtual environment name. Only alphanumeric characters, dots, underscores, and hyphens are allowed."
+    exit 1
+fi
+
+# Description information (optional)
+DESCRIPTION="${2:-}"
 
 # Check if virtual environment already exists
 if [ -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]; then
@@ -39,21 +44,27 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 SELECTED_PYTHON=""
-# Call select_python_version.sh script and capture output
-while IFS= read -r LINE
-do
-    if [[ -f ${LINE} ]]
-    then
-        SELECTED_PYTHON=$LINE
-        continue
-    fi
-    if [[ -n $(echo ${LINE} | grep ':' | grep -v '^-') ]]
-    then
-        echo "   ${LINE}"
-        continue
-    fi
-    echo "$LINE"
-done < <(${SCRIPT_DIR}/select_version.sh)
+# Call select_python_version.sh script and capture output with timeout
+if timeout 30s ${SCRIPT_DIR}/select_version.sh > /tmp/penv_select_output.$$ 2>&1; then
+    while IFS= read -r LINE
+    do
+        if [[ -f ${LINE} ]]
+        then
+            SELECTED_PYTHON=$LINE
+            continue
+        fi
+        if [[ -n $(echo ${LINE} | grep ':' | grep -v '^-') ]]
+        then
+            echo "   ${LINE}"
+            continue
+        fi
+        echo "$LINE"
+    done < /tmp/penv_select_output.$$
+    rm -f /tmp/penv_select_output.$$
+else
+    echo "Error: Timeout or error occurred during Python version selection. Using default python3."
+    rm -f /tmp/penv_select_output.$$
+fi
 
 # Check if a Python version was selected
 if [[ -n "$SELECTED_PYTHON" ]]; then
@@ -65,14 +76,13 @@ fi
 
 echo "Creating virtual environment '$VIRTUAL_ENV_NAME'..."
 # Create the virtual environment
-$CMD -m venv ${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME
-if [ $? -ne 0 ]; then
+if ! "$CMD" -m venv "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME"; then
     echo "Error: Failed to create virtual environment '$VIRTUAL_ENV_NAME'."
     exit 1
 fi
 
-echo "$DESCRIPTION" > "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME/description.txt"
-if [ $? -ne 0 ]; then
+# Write description with proper quote handling
+if ! printf "%s\n" "$DESCRIPTION" > "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME/description.txt"; then
     echo "Warning: Failed to write description to virtual environment."
 fi
 
