@@ -1,5 +1,5 @@
 pkgname="penv"
-pkgver="0.1.1"
+pkgver="0.1.2"
 pkgrel=2
 pkgdesc="A command-line tool for managing Python virtual environments"
 arch=("any")

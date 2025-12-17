@@ -10,6 +10,13 @@ All notable changes to penv will be documented in this file.
 - Added safety checks for directory operations in environment removal
 - Improved error reporting with more descriptive messages
 - Added signal trapping for graceful shutdowns in auto-clean script
+- Implemented requirements management (export/import) functionality
+- Implemented environment cloning feature
+- Added project binding functionality to link environments with project directories
+- Added disk usage reporting for virtual environments
+- Created auto-activation helper for shell integration
+- Added new commands: clone, requirements, project, usage
+- Enhanced README with documentation for all new features
 
 ### Changed
 - Fixed syntax errors in penv-list.sh and penv-show.sh scripts related to redirection
@@ -22,6 +29,8 @@ All notable changes to penv will be documented in this file.
 - Enhanced bash completion with additional options and timeout handling
 - Improved validation and error handling across all scripts
 - Used proper quoting for all variables to prevent injection issues
+- Updated main script with new command handling and help information
+- Updated packaging scripts with new version number 0.1.2
 
 ## [0.1.1] - 2025-09-01
 

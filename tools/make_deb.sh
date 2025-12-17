@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")/..
 
-VERSION=0.1.1
+VERSION=0.1.2
 DIST_DIR=${SCRIPT_DIR}/dist
 DEBIAN_DIR=${DIST_DIR}/DEBIAN
 BIN_DIR=${DIST_DIR}/usr/bin

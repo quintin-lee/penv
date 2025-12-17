@@ -69,6 +69,14 @@ Commands:
                 Usage: penv deactivate
   clean         Deactivates all virtual environments.
                 Usage: penv clean
+  clone         Clones a virtual environment to a new one.
+                Usage: penv clone <source_env> <dest_env> [description]
+  requirements  Export/import requirements for an environment.
+                Usage: penv requirements <env_name> <export|import> [file]
+  project       Bind projects to virtual environments.
+                Usage: penv project <bind|unbind|show|list>
+  usage         Show disk usage of virtual environments.
+                Usage: penv usage [--sort-by=size|name]
   help, -h, --help    Displays this help message.
                 Usage: penv help [command]
   --version     Display version information.
@@ -80,6 +88,11 @@ Examples:
   penv activate myproject
   penv deactivate
   penv remove myproject
+  penv clone myproject newproject "New project based on myproject"
+  penv requirements myproject export requirements.txt
+  penv requirements myproject import requirements.txt
+  penv project bind myproject
+  penv usage --sort-by=size
 ```
 
 ## Usage Examples
@@ -144,6 +157,66 @@ penv help list
 penv help remove
 ```
 
+### Clone a Virtual Environment
+
+```shell
+# Clone an existing environment to a new one
+penv clone myproject newproject
+
+# Clone with a description
+penv clone myproject newproject "New project based on myproject"
+```
+
+### Manage Requirements
+
+```shell
+# Export packages from an environment to requirements.txt
+penv requirements myproject export requirements.txt
+
+# Import packages from requirements.txt to an environment
+penv requirements myproject import requirements.txt
+
+# Export to a specific file
+penv requirements myproject export myproject-requirements.txt
+```
+
+### Project Binding
+
+```shell
+# Bind current directory to an environment
+cd /path/to/my/project
+penv project bind myproject
+
+# Show current directory binding
+penv project show
+
+# Unbind current directory
+penv project unbind
+
+# List all project bindings
+penv project list
+```
+
+### Auto-activation Setup
+
+To enable auto-activation when you `cd` into a project directory, add this to your `~/.bashrc` or `~/.zshrc`:
+
+```bash
+source /path/to/penv/scripts/penv-auto-activate.sh
+```
+
+Then you can use the `penv_auto_activate` function or override `cd` (see comments in the script).
+
+### View Disk Usage
+
+```shell
+# Show disk usage of all environments
+penv usage
+
+# Show environments sorted by name
+penv usage --sort-by=name
+```
+
 ## Troubleshooting Guide
 
 ### 1. Permission Issues
@@ -186,4 +259,4 @@ If you encounter other issues:
 - Enhanced terminal compatibility
 - Standardized for better cross-platform support
 
-See [CHANGELOG.md](file:///home/quintin/workspace/source/shell/python-venv/CHANGELOG.md) for complete version change history.
+See [CHANGELOG.md](CHANGELOG.md) for complete version change history.

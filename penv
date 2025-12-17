@@ -27,6 +27,14 @@ function usage()
     echo "                Usage: penv deactivate"
     echo "  clean         Deactivates all virtual environments."
     echo "                Usage: penv clean"
+    echo "  clone         Clones a virtual environment to a new one."
+    echo "                Usage: penv clone <source_env> <dest_env> [description]"
+    echo "  requirements  Export/import requirements for an environment."
+    echo "                Usage: penv requirements <env_name> <export|import> [file]"
+    echo "  project       Bind projects to virtual environments."
+    echo "                Usage: penv project <bind|unbind|show|list>"
+    echo "  usage         Show disk usage of virtual environments."
+    echo "                Usage: penv usage [--sort-by=size|name]"
     echo "  help, -h, --help    Displays this help message."
     echo "                Usage: penv help [command]"
     echo "  --version     Display version information."
@@ -38,6 +46,11 @@ function usage()
     echo "  penv activate myproject"
     echo "  penv deactivate"
     echo "  penv remove myproject"
+    echo "  penv clone myproject newproject \"New project based on myproject\""
+    echo "  penv requirements myproject export requirements.txt"
+    echo "  penv requirements myproject import requirements.txt"
+    echo "  penv project bind myproject"
+    echo "  penv usage --sort-by=size"
     echo ""
     echo "For command-specific help, use: penv help <command>"
     exit 1
@@ -130,6 +143,64 @@ function command_help()
             echo "Example:"
             echo "  penv clean"
             ;;
+        clone)
+            echo "Usage: penv clone <source_env_name> <dest_env_name> [description]"
+            echo ""
+            echo "Clones a Python virtual environment to a new one."
+            echo ""
+            echo "Arguments:"
+            echo "  source_env_name    Name of the virtual environment to clone from"
+            echo "  dest_env_name      Name of the new virtual environment to create"
+            echo "  description        Optional description for the new environment"
+            echo ""
+            echo "Example:"
+            echo "  penv clone myproject newproject \"New project based on myproject\""
+            ;;
+        requirements)
+            echo "Usage: penv requirements <env_name> <export|import> [requirements_file]"
+            echo ""
+            echo "Export or import Python package requirements for a virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name           Name of the virtual environment"
+            echo "  operation          'export' to save packages to file, 'import' to install from file"
+            echo "  requirements_file  Optional file path for requirements (default: environment's requirements.txt)"
+            echo ""
+            echo "Examples:"
+            echo "  penv requirements myproject export requirements.txt"
+            echo "  penv requirements myproject import requirements.txt"
+            ;;
+        project)
+            echo "Usage: penv project <bind|unbind|show|list>"
+            echo ""
+            echo "Bind projects to virtual environments."
+            echo ""
+            echo "Operations:"
+            echo "  bind   Bind current directory to a virtual environment"
+            echo "         Usage: penv project bind <env_name>"
+            echo "  unbind Unbind current directory from its virtual environment"
+            echo "         Usage: penv project unbind"
+            echo "  show   Show current directory binding"
+            echo "         Usage: penv project show"
+            echo "  list   List all project bindings"
+            echo "         Usage: penv project list"
+            echo ""
+            echo "Examples:"
+            echo "  penv project bind myproject"
+            echo "  penv project show"
+            echo "  penv project list"
+            ;;
+        usage)
+            echo "Usage: penv usage [--sort-by=size|name]"
+            echo ""
+            echo "Show disk usage of virtual environments."
+            echo ""
+            echo "Options:"
+            echo "  --sort-by=size|name   Sort environments by size (default) or name"
+            echo ""
+            echo "Example:"
+            echo "  penv usage --sort-by=name"
+            ;;
         *)
             echo "Unknown command: $cmd"
             echo "Use 'penv help' to see available commands."
@@ -145,7 +216,7 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean)
+    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage)
         script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"
