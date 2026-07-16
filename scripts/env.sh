@@ -6,6 +6,20 @@ die() {
     exit 1
 }
 
+# Load user config file if it exists
+PENV_CONFIG_DIR="${HOME}/.config/penv"
+PENV_CONFIG_FILE="${PENV_CONFIG_DIR}/config"
+if [[ -f "$PENV_CONFIG_FILE" ]]; then
+    while IFS='=' read -r key value; do
+        [[ -z "$key" || "$key" == \#* ]] && continue
+        case "$key" in
+            storage_dir) VENV_STORAGE_DIR="$value" ;;
+            default_python) # shellcheck disable=SC2034 # consumed by other scripts
+                PENV_DEFAULT_PYTHON="$value" ;;
+        esac
+    done < "$PENV_CONFIG_FILE"
+fi
+
 # Set the virtual environment storage directory with a default
 VENV_STORAGE_DIR=${VENV_STORAGE_DIR:-"$HOME/.cache/python-venv"}
 

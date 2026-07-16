@@ -46,6 +46,12 @@ function usage()
     echo "                Usage: penv project <bind|unbind|show|list>"
     echo "  usage         Show disk usage of virtual environments."
     echo "                Usage: penv usage [--sort-by=size|name]"
+    echo "  info          Show detailed information about an environment."
+    echo "                Usage: penv info <env_name>"
+    echo "  config        Manage penv configuration."
+    echo "                Usage: penv config [list|get|set]"
+    echo "  rename        Rename a virtual environment."
+    echo "                Usage: penv rename <old_name> <new_name>"
     echo "  help, -h, --help    Displays this help message."
     echo "                Usage: penv help [command]"
     echo "  --version     Display version information."
@@ -62,6 +68,10 @@ function usage()
     echo "  penv requirements myproject import requirements.txt"
     echo "  penv project bind myproject"
     echo "  penv usage --sort-by=size"
+    echo "  penv info myproject"
+    echo "  penv config set default_python python3.11"
+    echo "  penv config list"
+    echo "  penv rename myproject myproject2"
     echo ""
     echo "For command-specific help, use: penv help <command>"
     exit 1
@@ -212,6 +222,53 @@ function command_help()
             echo "Example:"
             echo "  penv usage --sort-by=name"
             ;;
+        info)
+            echo "Usage: penv info <env_name>"
+            echo ""
+            echo "Show detailed information about a virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name      Name of the virtual environment"
+            echo ""
+            echo "Output includes: Python version, path, disk usage,"
+            echo "package count, creation date, and activation status."
+            echo ""
+            echo "Example:"
+            echo "  penv info myproject"
+            ;;
+        config)
+            echo "Usage: penv config [list|get|set]"
+            echo ""
+            echo "Manage penv configuration."
+            echo ""
+            echo "Operations:"
+            echo "  list          List all configuration settings"
+            echo "  get <key>     Get a configuration value"
+            echo "  set <key> <value>  Set a configuration value"
+            echo ""
+            echo "Settings:"
+            echo "  default_python    Default Python executable for 'penv create'"
+            echo "  storage_dir       Override the virtual environment storage directory"
+            echo ""
+            echo "Examples:"
+            echo "  penv config list"
+            echo "  penv config set default_python python3.11"
+            echo "  penv config get storage_dir"
+            ;;
+        rename)
+            echo "Usage: penv rename <old_name> <new_name>"
+            echo ""
+            echo "Rename a virtual environment."
+            echo ""
+            echo "Arguments:"
+            echo "  old_name      Current name of the virtual environment"
+            echo "  new_name      New name for the virtual environment"
+            echo ""
+            echo "This also updates activation markers and project bindings."
+            echo ""
+            echo "Example:"
+            echo "  penv rename myproject myproject2"
+            ;;
         *)
             die "Unknown command: '$cmd'. Use 'penv help' to see available commands."
             ;;
@@ -225,7 +282,7 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage)
+    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename)
         script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"

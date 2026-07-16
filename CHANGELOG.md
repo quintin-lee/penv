@@ -6,6 +6,11 @@ All notable changes to penv will be documented in this file.
 
 ### Added
 
+- `penv info <env>` — show detailed information about a virtual environment
+- `penv config [list|get|set]` — manage penv configuration (default_python, storage_dir)
+- `penv rename <old> <new>` — rename a virtual environment (updates activation markers and project bindings)
+- `scripts/penv-completion.fish` — fish shell tab completion (auto-completes all commands and environment names)
+- `tests/penv_info.bats`, `tests/penv_config.bats`, `tests/penv_rename.bats` — 23 new test cases
 - `tools/make_tag.sh` — script to create annotated git tags from `VERSION` file
 - Makefile with targets: `all`, `pkg`, `deb`, `dist`, `install`, `clean`, `help`
 - `.github/workflows/ci.yml` — ShellCheck + bash syntax check on push and PR
