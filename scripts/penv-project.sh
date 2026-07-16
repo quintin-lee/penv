@@ -16,7 +16,6 @@ then
 fi
 
 OPERATION=$1
-CURRENT_DIR=$(pwd)
 
 case "$OPERATION" in
     bind)

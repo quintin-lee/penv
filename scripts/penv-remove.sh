@@ -26,7 +26,7 @@ then
     # Additional safety check to ensure we're only removing legitimate venv directories
     if [[ "${VENV_STORAGE_DIR}" == *"/.cache/python-venv" || "${VENV_STORAGE_DIR}" == "$HOME"* ]]; then
         echo "Removing virtual environment '$VIRTUAL_ENV_NAME'..."
-        if rm -rf "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME"; then
+        if rm -rf "${VENV_STORAGE_DIR:?}/${VIRTUAL_ENV_NAME:?}"; then
             echo "Virtual environment '$VIRTUAL_ENV_NAME' has been successfully deleted."
         else
             echo "Error: Failed to delete virtual environment '$VIRTUAL_ENV_NAME'."

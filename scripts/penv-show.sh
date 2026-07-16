@@ -3,7 +3,7 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
-CURRENT_ENV=$CURRENT_ENV
+CURRENT_ENV="${1:-$CURRENT_ENV}"
 
 for f in "${VENV_STORAGE_DIR}"/*.activate
 do

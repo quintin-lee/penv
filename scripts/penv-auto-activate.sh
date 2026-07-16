@@ -7,12 +7,14 @@
 
 # Function to automatically activate environment bound to current directory
 penv_auto_activate() {
-    local SCRIPT_DIR=$(dirname "$(realpath "$0")")
+    local SCRIPT_DIR
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
     source "${SCRIPT_DIR}/env.sh" 2>/dev/null || source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 
     # Check for .penv file in current directory
     if [ -f .penv ]; then
-        local env_name=$(cat .penv)
+        local env_name
+        env_name=$(cat .penv)
 
         # Only activate if the environment exists
         if [ -d "$VENV_STORAGE_DIR/$env_name" ]; then

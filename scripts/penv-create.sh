@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-source ${SCRIPT_DIR}/env.sh
+source "${SCRIPT_DIR}/env.sh"
 
 # Ensure virtual environment storage directory exists
 if [ ! -d "${VENV_STORAGE_DIR}" ]; then
-    mkdir -p ${VENV_STORAGE_DIR}
-    if [ $? -ne 0 ]; then
+    if ! mkdir -p "${VENV_STORAGE_DIR}"; then
         echo "Error: Failed to create virtual environment storage directory '${VENV_STORAGE_DIR}'."
         exit 1
     fi
@@ -45,7 +44,7 @@ fi
 
 SELECTED_PYTHON=""
 # Call select_python_version.sh script and capture output with timeout
-if timeout 30s ${SCRIPT_DIR}/select_version.sh > /tmp/penv_select_output.$$ 2>&1; then
+if timeout 30s "${SCRIPT_DIR}/select_version.sh" > /tmp/penv_select_output.$$ 2>&1; then
     while IFS= read -r LINE
     do
         if [[ -f ${LINE} ]]
@@ -53,8 +52,7 @@ if timeout 30s ${SCRIPT_DIR}/select_version.sh > /tmp/penv_select_output.$$ 2>&1
             SELECTED_PYTHON=$LINE
             continue
         fi
-        if [[ -n $(echo ${LINE} | grep ':' | grep -v '^-') ]]
-        then
+        if grep -q ':' <<< "$LINE" && ! grep -q '^-' <<< "$LINE"; then
             echo "   ${LINE}"
             continue
         fi

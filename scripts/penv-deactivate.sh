@@ -5,7 +5,7 @@ source "${SCRIPT_DIR}/env.sh"
 
 # Use ps command to get the parent process PID
 PARENT_PID=$(ps -o ppid= -p $$)
-PARENT_PID=$(echo $(ps -o ppid= -p $PARENT_PID) | cut -f2)
+PARENT_PID=$(ps -o ppid= -p "$PARENT_PID" | cut -f2)
 
 if [[ -n "$CURRENT_ENV" ]]
 then

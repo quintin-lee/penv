@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-source ${SCRIPT_DIR}/env.sh
+source "${SCRIPT_DIR}/env.sh"
 
 # Default values
 SORT_BY="name"
@@ -31,14 +31,13 @@ MAX_DESCRIPTION_WIDTH=11    # Minimum width for "Description"
 MAX_VERSION_WIDTH=20
 
 # Store all virtual environment names and descriptions
-declare -A ENV_NAMES
-declare -A ENV_DESCRIPTIONS
+    declare -A ENV_DESCRIPTIONS
 declare -a ENV_LIST
 declare -A ENV_PYTHON_VERSIONS
 declare -A ENV_ACTIVATED
 
 # Get currently activated environment
-CURRENT_ENV_FILE=$(ls ${VENV_STORAGE_DIR}/*.activate 2>/dev/null | head -n 1)
+CURRENT_ENV_FILE=$(ls "${VENV_STORAGE_DIR}"/*.activate 2>/dev/null | head -n 1)
 CURRENT_ENV=""
 if [[ -n "$CURRENT_ENV_FILE" ]]; then
     CURRENT_ENV=$(basename "$CURRENT_ENV_FILE" .activate)
@@ -75,10 +74,7 @@ do
 
     # Read description if available
     if [ -f "${DESCRIPTION_FILE}" ]; then
-        DESCRIPTION=$(cat "${DESCRIPTION_FILE}" 2>/dev/null)
-        if [ $? -ne 0 ]; then
-            DESCRIPTION=""
-        fi
+        DESCRIPTION=$(cat "${DESCRIPTION_FILE}" 2>/dev/null || true)
     else
         DESCRIPTION=""
     fi
@@ -90,11 +86,10 @@ do
     fi
 
     # Store name, description, version and activation status
-    ENV_NAMES[$env_name]=$env_name
     ENV_DESCRIPTIONS[$env_name]=$DESCRIPTION
     ENV_PYTHON_VERSIONS[$env_name]=$PYTHON_VERSION
     ENV_ACTIVATED[$env_name]=$ACTIVATED
-    ENV_LIST+=($env_name)
+    ENV_LIST+=("$env_name")
 
     # Update maximum width
     NAME_LENGTH=${#env_name}
@@ -127,12 +122,12 @@ fi
 # Sort environment names
 if [[ "$SORT_BY" == "date" ]]; then
     # Sort by creation date (oldest first)
-    IFS=$'\n' ENV_LIST=($(for env in "${ENV_LIST[@]}"; do
-        echo "$(stat -c %Y ${VENV_STORAGE_DIR}/${env}) $env"
-    done | sort -n | cut -d' ' -f2-))
+    mapfile -t ENV_LIST < <(for env in "${ENV_LIST[@]}"; do
+        echo "$(stat -c %Y "${VENV_STORAGE_DIR}/${env}") $env"
+    done | sort -n | cut -d' ' -f2-)
 else
     # Sort by name (default)
-    IFS=$'\n' ENV_LIST=($(sort <<<"${ENV_LIST[*]}"))
+    mapfile -t ENV_LIST < <(sort <<<"${ENV_LIST[*]}")
 fi
 
 unset IFS
@@ -143,7 +138,7 @@ echo
 
 # Print table header
 printf "\033[1m%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\033[0m\n" "Name" "Description" "Python Version" "Status"
-printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\n" "$(printf '%*s' $MAX_NAME_WIDTH | tr ' ' '-')" "-----------" "--------------" "------"
+printf "%-${MAX_NAME_WIDTH}s    %-${MAX_DESCRIPTION_WIDTH}s    %-${MAX_VERSION_WIDTH}s    %s\n" "$(printf '%*s' "$MAX_NAME_WIDTH" '' | tr ' ' '-')" "-----------" "--------------" "------"
 
 # Print sorted environments with aligned output and status indicators
 for env_name in "${ENV_LIST[@]}"

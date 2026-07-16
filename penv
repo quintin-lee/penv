@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
-SCRIPT_NAME=$(basename ${SCRIPT_PATH})
+SCRIPT_NAME=$(basename "${SCRIPT_PATH}")
 
 # Version information — sourced from VERSION file if present
 VERSION_FILE="${SCRIPT_DIR}/VERSION"

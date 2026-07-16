@@ -8,7 +8,7 @@ ACTIVATE_FILES=("${VENV_STORAGE_DIR}"/*.activate)
 PID_FILES=("${VENV_STORAGE_DIR}"/*.pid)
 
 PARENT_PID=$(ps -o ppid= -p $$)
-PARENT_PID=$(echo $(ps -o ppid= -p $PARENT_PID) | cut -f2)
+PARENT_PID=$(ps -o ppid= -p "$PARENT_PID" | cut -f2)
 
 # Only process if files exist
 if [[ -e "${ACTIVATE_FILES[0]}" ]]; then

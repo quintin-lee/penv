@@ -18,8 +18,7 @@ print_python_version() {
     local python_executable=$1
     if [[ -x "$python_executable" ]]; then
         local version_output
-        version_output=$(timeout 2s "$python_executable" --version 2>&1)
-        if [ $? -eq 0 ]; then
+        if version_output=$(timeout 2s "$python_executable" --version 2>&1); then
             echo "Python $(echo "$version_output" | cut -d' ' -f2)"
         else
             echo "Python (invalid)"
@@ -28,7 +27,7 @@ print_python_version() {
 }
 
 # Check common Python executable paths
-common_paths=(/usr/bin /usr/local/bin /opt $HOME/.local/bin)
+common_paths=(/usr/bin /usr/local/bin /opt "$HOME/.local/bin")
 
 # Find all Python executables using find command
 # Note: This may take some time depending on the scale of the file system
@@ -48,13 +47,13 @@ for path in "${common_paths[@]}"; do
 done
 
 # Remove duplicate actual file paths
-unique_paths=($(printf "%s\n" "${all_real_paths[@]}" | sort -u))
+mapfile -t unique_paths < <(printf "%s\n" "${all_real_paths[@]}" | sort -u)
 
 # Show menu and allow user to select
 show_menu() {
     printf "\033c"  # Clear screen using ANSI escape code (more portable than 'clear')
     echo "Choose a Python version:"
-    for i in ${!unique_paths[@]}; do
+    for i in "${!unique_paths[@]}"; do
         if [ "$i" -eq "$current_index" ]; then
             echo "-> $i: $(print_python_version "${unique_paths[$i]}")"
         else

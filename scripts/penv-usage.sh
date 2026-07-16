@@ -30,7 +30,6 @@ fi
 # Store environment info
 declare -a ENV_NAMES
 declare -a ENV_SIZES
-declare -a ENV_PATHS
 
 # Collect environment info
 env_index=0
@@ -43,9 +42,8 @@ do
         # Calculate size using du command
         env_size=$(du -sh "$env_path" 2>/dev/null | cut -f1)
         if [ -n "$env_size" ]; then
-            ENV_NAMES[$env_index]="$env_name"
-            ENV_SIZES[$env_index]="$env_size"
-            ENV_PATHS[$env_index]="$env_path"
+            ENV_NAMES[env_index]="$env_name"
+            ENV_SIZES[env_index]="$env_size"
             ((env_index++))
         fi
     fi
@@ -68,15 +66,15 @@ printf "%-30s %10s\n" "-----------" "----"
 # Sort environments by size or name
 if [[ "$SORT_BY" == "name" ]]; then
     # Sort by name
-    IFS=$'\n' sorted_data=($(for i in "${!ENV_NAMES[@]}"; do
+    mapfile -t sorted_data < <(for i in "${!ENV_NAMES[@]}"; do
         echo "${ENV_NAMES[$i]}|${ENV_SIZES[$i]}"
-    done | sort))
+    done | sort)
 else
     # Sort by size - this is more complex since we're dealing with human-readable sizes
     # For now, we'll sort by the size values directly, which will work for same units
-    IFS=$'\n' sorted_data=($(for i in "${!ENV_NAMES[@]}"; do
+    mapfile -t sorted_data < <(for i in "${!ENV_NAMES[@]}"; do
         echo "${ENV_SIZES[$i]}|${ENV_NAMES[$i]}"
-    done | sort -h))
+    done | sort -h)
     # Extract name and size in correct order after sorting
     formatted_data=()
     for item in "${sorted_data[@]}"; do
