@@ -13,6 +13,12 @@
 
 set -euo pipefail
 
+# Unified error handler
+die() {
+    echo "ERROR: $*" >&2
+    exit 1
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_FILE="$SCRIPT_DIR/VERSION"
 PKGBUILD_FILE="$SCRIPT_DIR/PKGBUILD"
@@ -25,21 +31,18 @@ fi
 # ── 1. Read version ──────────────────────────────────────────
 
 if [[ ! -f "$VERSION_FILE" ]]; then
-    echo "ERROR: VERSION file not found at $VERSION_FILE" >&2
-    exit 1
+    die "VERSION file not found at $VERSION_FILE"
 fi
 
 VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
 
 if [[ -z "$VERSION" ]]; then
-    echo "ERROR: VERSION file is empty" >&2
-    exit 1
+    die "VERSION file is empty"
 fi
 
 # Validate semver-ish format (X.Y.Z or X.Y)
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-    echo "ERROR: '$VERSION' is not a valid version number (expected X.Y.Z or X.Y)" >&2
-    exit 1
+    die "'$VERSION' is not a valid version number (expected X.Y.Z or X.Y)"
 fi
 
 TAG="v$VERSION"
@@ -53,8 +56,7 @@ echo ""
 cd "$SCRIPT_DIR"
 
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    echo "ERROR: Not inside a git repository" >&2
-    exit 1
+    die "Not inside a git repository"
 fi
 
 if [[ -n "$(git status --porcelain)" ]]; then

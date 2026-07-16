@@ -6,9 +6,8 @@ source "${SCRIPT_DIR}/env.sh"
 # Check arguments
 if [ $# -eq 0 ]
 then
-    echo "Error: Please specify the virtual environment to activate."
+    die "Please specify the virtual environment to activate."
     echo "Usage: penv activate <virtual_env_name>"
-    exit 1
 fi
 
 # Virtual environment name
@@ -16,15 +15,13 @@ VIRTUAL_ENV_NAME=$1
 
 # Validate virtual environment name (no special characters except - and _)
 if [[ ! "$VIRTUAL_ENV_NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-    echo "Error: Invalid virtual environment name. Only alphanumeric characters, dots, underscores, and hyphens are allowed."
-    exit 1
+    die "Invalid virtual environment name. Only alphanumeric characters, dots, underscores, and hyphens are allowed."
 fi
 
 # Check if virtual environment exists
 if [ ! -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]
 then
-    echo "Error: Virtual environment '$VIRTUAL_ENV_NAME' does not exist."
-    exit 1
+    die "Virtual environment '$VIRTUAL_ENV_NAME' does not exist."
 fi
 
 # Activate virtual environment - properly quote arguments to prevent injection

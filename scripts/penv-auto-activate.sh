@@ -29,7 +29,7 @@ penv_auto_activate() {
                     echo "1" > "${VENV_STORAGE_DIR}/${env_name}.activate"
                     export CURRENT_ENV="$env_name"
                 else
-                    echo "Error: Activation script not found in environment $env_name"
+                    echo "Error: Activation script not found in environment $env_name" >&2
                 fi
             else
                 echo "Environment $env_name is already active"

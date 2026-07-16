@@ -13,9 +13,8 @@ while [[ $# -gt 0 ]]; do
             SORT_BY="${1#*=}"
             ;;
         *)
-            echo "Unknown option: $1"
+            die "Unknown option: $1"
             echo "Usage: penv usage [--sort-by=size|name]"
-            exit 1
             ;;
     esac
     shift

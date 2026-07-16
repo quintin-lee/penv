@@ -6,16 +6,14 @@ source "${SCRIPT_DIR}/env.sh"
 # Ensure virtual environment storage directory exists
 if [ ! -d "${VENV_STORAGE_DIR}" ]; then
     if ! mkdir -p "${VENV_STORAGE_DIR}"; then
-        echo "Error: Failed to create virtual environment storage directory '${VENV_STORAGE_DIR}'."
-        exit 1
+        die "Failed to create virtual environment storage directory '${VENV_STORAGE_DIR}'."
     fi
 fi
 
 # Check arguments
 if [ $# -lt 1 ]; then
-    echo "Error: No virtual environment name provided."
+    die "No virtual environment name provided."
     echo "Usage: $0 <virtual_env_name> [description]"
-    exit 1
 fi
 
 # Virtual environment name
@@ -23,8 +21,7 @@ VIRTUAL_ENV_NAME=$1
 
 # Validate virtual environment name (no special characters except - and _)
 if [[ ! "$VIRTUAL_ENV_NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-    echo "Error: Invalid virtual environment name. Only alphanumeric characters, dots, underscores, and hyphens are allowed."
-    exit 1
+    die "Invalid virtual environment name. Only alphanumeric characters, dots, underscores, and hyphens are allowed."
 fi
 
 # Description information (optional)
@@ -32,14 +29,12 @@ DESCRIPTION="${2:-}"
 
 # Check if virtual environment already exists
 if [ -d "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME" ]; then
-    echo "Error: Virtual environment '$VIRTUAL_ENV_NAME' already exists."
-    exit 1
+    die "Virtual environment '$VIRTUAL_ENV_NAME' already exists."
 fi
 
 # Check if Python3 is installed
 if ! command -v python3 &> /dev/null; then
-    echo "Error: Python3 is not installed."
-    exit 1
+    die "Python3 is not installed."
 fi
 
 SELECTED_PYTHON=""
@@ -75,8 +70,7 @@ fi
 echo "Creating virtual environment '$VIRTUAL_ENV_NAME'..."
 # Create the virtual environment
 if ! "$CMD" -m venv "${VENV_STORAGE_DIR}/$VIRTUAL_ENV_NAME"; then
-    echo "Error: Failed to create virtual environment '$VIRTUAL_ENV_NAME'."
-    exit 1
+    die "Failed to create virtual environment '$VIRTUAL_ENV_NAME'."
 fi
 
 # Write description with proper quote handling

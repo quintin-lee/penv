@@ -17,9 +17,8 @@ while [[ $# -gt 0 ]]; do
             FILTER_PATTERN="${1#*=}"
             ;;
         *)
-            echo "Unknown option: $1"
+            die "Unknown option: $1"
             echo "Usage: penv list [--sort-by=name|date] [--filter=pattern]"
-            exit 1
             ;;
     esac
     shift

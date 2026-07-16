@@ -11,6 +11,12 @@ else
     VERSION="0.1.2"
 fi
 
+# Unified error handler
+die() {
+    echo "Error: $*" >&2
+    exit 1
+}
+
 function usage()
 {
     echo "Usage: ${SCRIPT_NAME} cmd [params]"
@@ -207,11 +213,9 @@ function command_help()
             echo "  penv usage --sort-by=name"
             ;;
         *)
-            echo "Unknown command: $cmd"
-            echo "Use 'penv help' to see available commands."
+            die "Unknown command: '$cmd'. Use 'penv help' to see available commands."
             ;;
     esac
-    exit 1
 }
 
 if [ $# -eq 0 ]
@@ -226,8 +230,7 @@ case "$cmd" in
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"
         else
-            echo "Error: Command script '$script_path' not found or not executable." >&2
-            exit 1
+            die "Command script '$script_path' not found or not executable."
         fi
         ;;
     help|-h|--help)

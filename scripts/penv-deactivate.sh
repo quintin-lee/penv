@@ -22,8 +22,7 @@ then
                 echo "$NUM" > "$FILE"
             fi
         else
-            echo "Warning: Invalid content in activation file" >&2
-            exit 1
+            die "Invalid content in activation file"
         fi
     fi
 
@@ -35,5 +34,5 @@ then
         kill -9 "$PARENT_PID" 2>/dev/null || true
     fi
 else
-    exit 1
+    die "No active environment to deactivate."
 fi
