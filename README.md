@@ -21,6 +21,7 @@
 - [How It Works](#how-it-works)
 - [Configuration](#configuration)
 - [Development](#development)
+  - [Packaging](#packaging)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
@@ -53,7 +54,31 @@ All environments are stored under `~/.cache/python-venv/` by default.
 
 ## Installation
 
-### Method 1: ArchLinux / Manjaro (AUR-style PKGBUILD)
+### Prerequisites
+
+- **Bash 4.0+** (required for associative arrays and other features)
+- **Python 3** with `venv` module
+- **expect** (required for `penv activate`)
+- **make** (optional — for using the Makefile)
+
+### Method 1: Build Packages with Makefile (Recommended)
+
+The project provides a Makefile to manage all packaging workflows:
+
+```shell
+# Build both ArchLinux and Debian packages
+make
+
+# Build only ArchLinux package
+make pkg
+
+# Build only Debian package
+make deb
+```
+
+See the [Packaging](#packaging) section for all available targets.
+
+### Method 2: ArchLinux / Manjaro (PKGBUILD)
 
 ```shell
 bash tools/make_pkg.sh
@@ -65,7 +90,7 @@ This creates an installable `.pkg.tar.zst` package. Install it with:
 sudo pacman -U penv-*.pkg.tar.zst
 ```
 
-### Method 2: Debian / Ubuntu
+### Method 3: Debian / Ubuntu
 
 ```shell
 # sudo password is required during execution
@@ -74,7 +99,13 @@ bash tools/make_deb.sh
 
 The `.deb` package will be generated in the project root.
 
-### Method 3: Direct Installation
+### Method 4: Direct Installation
+
+```shell
+make install
+```
+
+Or manually:
 
 ```shell
 # Clone the repo
@@ -85,11 +116,10 @@ cd penv
 export PATH="$PWD:$PATH"
 
 # Or install to a system location
-sudo cp penv /usr/local/bin/
-sudo cp -r scripts /usr/local/penv/
+sudo make install
 ```
 
-### Method 4: Download Release
+### Method 5: Download Release
 
 1. Visit the [Releases page](https://github.com/quintin-lee/penv/releases)
 2. Download the latest version for your system
@@ -314,10 +344,13 @@ penv create myproject
 │   ├── select_version.sh         # Interactive Python version picker
 │   ├── auto-clean.sh             # Periodic cleanup daemon
 │   └── penv.service              # systemd service unit
+├── Makefile                       # Build orchestration (pkg/deb/install/clean)
 ├── tools/
 │   ├── make_pkg.sh               # ArchLinux package build
 │   └── make_deb.sh               # Debian/Ubuntu package build
-└── PKGBUILD                      # ArchLinux PKGBUILD
+├── PKGBUILD                      # ArchLinux PKGBUILD
+├── LICENSE                        # GPL v3 license
+└── .gitignore                     # Build artifact ignore rules
 ```
 
 ### Code Style
@@ -336,6 +369,32 @@ penv create myproject
 3. Make your changes
 4. Test manually with `bash -x penv <command>` for debugging
 5. Submit a Pull Request
+
+### Packaging
+
+The project uses a **Makefile** to orchestrate all packaging workflows. Available targets:
+
+```shell
+make               # Build both ArchLinux and Debian packages
+make pkg           # Build ArchLinux package only
+make deb           # Build Debian package only
+make dist          # Create distribution tarball (penv.tar.gz)
+make install       # Install directly to system
+make clean         # Remove all build artifacts
+make help          # Show all targets and options
+```
+
+You can override the package version:
+
+```shell
+make VERSION=0.2.0 pkg
+```
+
+Or stage an installation to a custom root:
+
+```shell
+make DESTDIR=/tmp/penv-stage install
+```
 
 ---
 
