@@ -29,7 +29,7 @@ if [[ ! -f "$VERSION_FILE" ]]; then
     exit 1
 fi
 
-VERSION="$(cat "$VERSION_FILE" | tr -d '[:space:]')"
+VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
 
 if [[ -z "$VERSION" ]]; then
     echo "ERROR: VERSION file is empty" >&2

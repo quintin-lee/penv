@@ -23,6 +23,7 @@ penv_auto_activate() {
                 echo "Auto-activating environment: $env_name"
                 # Source the activation script directly
                 if [ -f "$VENV_STORAGE_DIR/$env_name/bin/activate" ]; then
+                    # shellcheck disable=SC1090
                     source "$VENV_STORAGE_DIR/$env_name/bin/activate"
                     # Create activation marker
                     echo "1" > "${VENV_STORAGE_DIR}/${env_name}.activate"
