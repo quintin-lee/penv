@@ -20,6 +20,7 @@ All notable changes to penv will be documented in this file.
 - `tools/make_tag.sh` — script to create annotated git tags from `VERSION` file
 - Makefile with targets: `all`, `pkg`, `deb`, `dist`, `install`, `clean`, `help`
 - `.github/workflows/ci.yml` — ShellCheck + bash syntax check on push and PR
+- `.github/workflows/release.yml` — tag-triggered release CI: verify tag matches VERSION, run tests + shellcheck, build Arch (.pkg.tar.zst) and Debian (.deb) packages, publish to GitHub Releases
 - `.github/dependabot.yml` — automated weekly dependency updates
 - `.gitignore` with build artifacts, IDE, and OS entries
 - `LICENSE` — GPL v3

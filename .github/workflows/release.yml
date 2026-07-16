@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches VERSION file
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          FILE_VERSION="$(cat VERSION | tr -d '[:space:]')"
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "ERROR: Tag version (${TAG_VERSION}) != VERSION file (${FILE_VERSION})"
+            exit 1
+          fi
+          echo "Tag ${GITHUB_REF_NAME} matches VERSION (${FILE_VERSION})"
+
+      # ── Install test/package tooling ──
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck dpkg-dev
+
+      # ── Run tests (same gates as CI) ──
+
+      - name: ShellCheck
+        run: shellcheck -x --severity=warning scripts/*.sh tools/*.sh penv
+
+      - name: Bash syntax check
+        run: |
+          bash -n penv
+          bash -n scripts/*.sh
+          bash -n tools/*.sh
+
+      - name: Bats tests
+        run: npx --yes bats tests/
+
+      # ── Build distribution tarball ──
+
+      - name: Build distribution tarball
+        run: make dist
+
+      # ── Build Debian package ──
+
+      - name: Build Debian package
+        run: make deb
+
+      # ── Build Arch Linux package (via Docker) ──
+
+      - name: Build Arch Linux package
+        run: |
+          docker run --rm \
+            -v "$PWD":/work \
+            -w /work \
+            archlinux:latest \
+            /bin/bash -c "
+              pacman -Syu --noconfirm base-devel sudo &&
+              useradd -m builder &&
+              echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&
+              chown -R builder:builder /work &&
+              sudo -u builder makepkg -f --noconfirm
+            "
+
+      # ── List artifacts ──
+
+      - name: List build artifacts
+        run: |
+          echo "=== Build artifacts ==="
+          ls -lh *.deb *.pkg.tar.zst penv.tar.gz 2>/dev/null || echo "(no artifacts found)"
+
+      # ── Create GitHub Release ──
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            penv_*.deb
+            penv-*.pkg.tar.zst
+            penv.tar.gz
+          generate_release_notes: true
