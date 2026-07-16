@@ -2,6 +2,36 @@
 
 All notable changes to penv will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `tools/make_tag.sh` — script to create annotated git tags from `VERSION` file
+- Makefile with targets: `all`, `pkg`, `deb`, `dist`, `install`, `clean`, `help`
+- `.github/workflows/ci.yml` — ShellCheck + bash syntax check on push and PR
+- `.github/dependabot.yml` — automated weekly dependency updates
+- `.gitignore` with build artifacts, IDE, and OS entries
+- `LICENSE` — GPL v3
+- CI status badge in README
+
+### Changed
+
+- Unified version management: `VERSION` file is now the single source of truth
+  - `Makefile`, `penv` entry script, and `tools/make_deb.sh` read from `VERSION`
+  - PKGBUILD updated with comment referencing `VERSION` file
+- `README.md` rewritten with architecture guide, development docs, contributing guide
+- `penv-completion.bash` fixed timeout handling for environment listing
+- `select_version.sh` simplified timeout variable reference
+
+### Fixed
+
+- All shellcheck warnings and errors resolved across 13 shell scripts
+  - Variable quoting (`SC2086`), array splitting (`SC2206`/`SC2207`)
+  - Useless `echo $(ps)` → direct `ps` invocation (`SC2046`)
+  - Useless `cat` → input redirection (`SC2002`)
+  - Self-assign fallback (`SC2269`)
+  - Unused variable removal (`SC2034`)
+
 ## [0.1.2] - 2025-12-17
 
 ### Added

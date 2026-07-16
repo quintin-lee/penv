@@ -2,6 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/quintin-lee/penv/releases)
 [![License](https://img.shields.io/badge/license-GPL-green.svg)](LICENSE)
+[![CI](https://github.com/quintin-lee/penv/actions/workflows/ci.yml/badge.svg)](https://github.com/quintin-lee/penv/actions/workflows/ci.yml)
 [![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://github.com/quintin-lee/penv)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
