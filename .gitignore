@@ -1,0 +1,27 @@
+# Distribution packages
+penv-*.pkg.tar.zst
+penv-*.deb
+penv.tar.gz
+dist/
+
+# ArchLinux build artifacts
+pkg/
+src/
+
+# Python virtual environments (managed by penv itself)
+.cache/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.codegraph/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+/tmp/
