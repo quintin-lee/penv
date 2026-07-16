@@ -78,6 +78,20 @@ clean-deb:
 	@rm -f penv_*.deb
 	@echo "==> Debian build artifacts removed."
 
+# ── Testing ────────────────────────────────────────────────────────────
+
+.PHONY: test test-shellcheck
+
+test:
+	@echo "==> Running bats test suite..."
+	@npx bats tests/
+
+test-shellcheck:
+	@echo "==> Checking shell script syntax..."
+	@shellcheck -x --severity=warning scripts/*.sh tools/*.sh penv tests/setup.bash
+	@bash -n scripts/*.sh tools/*.sh penv
+	@echo "==> All shell scripts pass."
+
 # ── Help ────────────────────────────────────────────────────────────
 
 help:

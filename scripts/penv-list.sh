@@ -126,7 +126,7 @@ if [[ "$SORT_BY" == "date" ]]; then
     done | sort -n | cut -d' ' -f2-)
 else
     # Sort by name (default)
-    mapfile -t ENV_LIST < <(sort <<<"${ENV_LIST[*]}")
+    mapfile -t ENV_LIST < <(for env in "${ENV_LIST[@]}"; do echo "$env"; done | sort)
 fi
 
 unset IFS
