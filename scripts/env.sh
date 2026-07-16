@@ -23,6 +23,9 @@ fi
 # Set the virtual environment storage directory with a default
 VENV_STORAGE_DIR=${VENV_STORAGE_DIR:-"$HOME/.cache/python-venv"}
 
+# Default plugin directory (can be overridden via config or env var)
+PENV_PLUGIN_DIR=${PENV_PLUGIN_DIR:-"${HOME}/.config/penv/plugins"}
+
 # Create the directory if it doesn't exist
 if [[ ! -d "$VENV_STORAGE_DIR" ]]; then
     if ! mkdir -p "$VENV_STORAGE_DIR"; then

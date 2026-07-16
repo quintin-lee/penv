@@ -11,6 +11,12 @@ All notable changes to penv will be documented in this file.
 - `penv rename <old> <new>` — rename a virtual environment (updates activation markers and project bindings)
 - `scripts/penv-completion.fish` — fish shell tab completion (auto-completes all commands and environment names)
 - `tests/penv_info.bats`, `tests/penv_config.bats`, `tests/penv_rename.bats` — 23 new test cases
+  - Total tests: 58 (up from 22 in initial bats suite)
+- `penv doctor` — system health diagnostics (dependencies, storage, markers, env integrity, completion, service)
+- `penv prune [--force]` — remove broken virtual environments (missing python/pyvenv.cfg/activate)
+- `penv plugin [list]` — list installed plugins from `~/.config/penv/plugins/`
+- Plugin dispatch: unknown commands fall through to `$PENV_PLUGIN_DIR/<cmd>.sh` automatically
+- `tests/penv_doctor.bats`, `tests/penv_prune.bats`, `tests/penv_plugin.bats` — 13 new test cases
 - `tools/make_tag.sh` — script to create annotated git tags from `VERSION` file
 - Makefile with targets: `all`, `pkg`, `deb`, `dist`, `install`, `clean`, `help`
 - `.github/workflows/ci.yml` — ShellCheck + bash syntax check on push and PR

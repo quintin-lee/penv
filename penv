@@ -50,9 +50,15 @@ function usage()
     echo "                Usage: penv info <env_name>"
     echo "  config        Manage penv configuration."
     echo "                Usage: penv config [list|get|set]"
-    echo "  rename        Rename a virtual environment."
-    echo "                Usage: penv rename <old_name> <new_name>"
-    echo "  help, -h, --help    Displays this help message."
+  echo "  rename        Rename a virtual environment."
+                echo "                Usage: penv rename <old_name> <new_name>"
+                echo "  doctor        Diagnose penv system health."
+                echo "                Usage: penv doctor"
+                echo "  prune         Remove broken virtual environments."
+                echo "                Usage: penv prune [--force]"
+                echo "  plugin        List installed plugins."
+                echo "                Usage: penv plugin [list]"
+                echo "  help, -h, --help    Displays this help message."
     echo "                Usage: penv help [command]"
     echo "  --version     Display version information."
     echo ""
@@ -72,6 +78,9 @@ function usage()
     echo "  penv config set default_python python3.11"
     echo "  penv config list"
     echo "  penv rename myproject myproject2"
+    echo "  penv doctor"
+    echo "  penv prune"
+    echo "  penv plugin list"
     echo ""
     echo "For command-specific help, use: penv help <command>"
     exit 1
@@ -269,6 +278,50 @@ function command_help()
             echo "Example:"
             echo "  penv rename myproject myproject2"
             ;;
+        doctor)
+            echo "Usage: penv doctor"
+            echo ""
+            echo "Diagnose penv system health."
+            echo ""
+            echo "Checks dependencies (python3, expect, git), storage directory"
+            echo "permissions, activation marker integrity, environment health,"
+            echo "shell completion, systemd service, and configuration file."
+            echo ""
+            echo "Returns exit code 0 if no failures, 1 if any checks failed."
+            echo ""
+            echo "Example:"
+            echo "  penv doctor"
+            ;;
+        prune)
+            echo "Usage: penv prune [--force]"
+            echo ""
+            echo "Remove broken virtual environments."
+            echo ""
+            echo "An environment is considered broken if it is missing any of:"
+            echo "  - Python interpreter (bin/python or bin/python3)"
+            echo "  - pyvenv.cfg"
+            echo "  - bin/activate"
+            echo ""
+            echo "Options:"
+            echo "  --force       Skip confirmation prompt"
+            echo ""
+            echo "Example:"
+            echo "  penv prune"
+            echo "  penv prune --force"
+            ;;
+        plugin)
+            echo "Usage: penv plugin [list]"
+            echo ""
+            echo "List installed plugins."
+            echo ""
+            echo "Plugins are executable .sh scripts placed in:"
+            echo "  ~/.config/penv/plugins/"
+            echo ""
+            echo "The filename (without .sh) becomes the command name."
+            echo ""
+            echo "Example:"
+            echo "  penv plugin list"
+            ;;
         *)
             die "Unknown command: '$cmd'. Use 'penv help' to see available commands."
             ;;
@@ -282,7 +335,7 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename)
+    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin)
         script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"
@@ -301,6 +354,15 @@ case "$cmd" in
         version
         ;;
     *)
+        # Check plugin system before giving up
+        penv_plugin_dir="${PENV_PLUGIN_DIR:-${HOME}/.config/penv/plugins}"
+        if [[ -d "$penv_plugin_dir" ]]; then
+            plugin_path="${penv_plugin_dir}/${cmd}.sh"
+            if [[ -f "$plugin_path" && -x "$plugin_path" ]]; then
+                "$plugin_path" "${@:2}"
+                exit $?
+            fi
+        fi
         echo "The command '$cmd' is not supported."
         usage
         ;;
