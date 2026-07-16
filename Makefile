@@ -14,6 +14,8 @@
 #   VERSION=0.1.2    Override package version
 #   DESTDIR=         Staging root for install (e.g. DESTDIR=/tmp/penv-stage)
 
+VERSION := $(shell cat VERSION 2>/dev/null)
+# Allow command-line override: make VERSION=x.y.z
 VERSION ?= 0.1.2
 DESTDIR ?=
 

@@ -1,3 +1,4 @@
+# VERSION is the single source of truth; update VERSION file only
 pkgname="penv"
 pkgver="0.1.2"
 pkgrel=2
