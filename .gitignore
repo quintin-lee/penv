@@ -25,3 +25,6 @@ Thumbs.db
 
 # Temp files
 /tmp/
+
+# Runtime metadata
+.omo/
