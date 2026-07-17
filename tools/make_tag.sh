@@ -2,22 +2,22 @@
 #
 # make_tag.sh — Release automation: sync versions, commit, tag
 #
-# Single entry point for creating releases. Run after bumping VERSION:
-#
-#   echo "0.3.0" > VERSION
+# Interactive usage:
 #   ./tools/make_tag.sh
+#   Enter new version (current: 0.2.0): 0.3.0
 #
 # What it does:
-#   1. Reads VERSION (single source of truth, must already be bumped)
+#   1. Prompt for new version (updates VERSION file)
 #   2. Syncs all static version references across codebase + docs
 #   3. Transforms CHANGELOG: moves [Unreleased] into a versioned section
 #   4. Stages + commits the version bump
 #   5. Creates an annotated git tag v<VERSION>
 #
-# Usage: ./tools/make_tag.sh [--dry-run]
+# Usage: ./tools/make_tag.sh [--dry-run] [X.Y.Z]
 #
 # Options:
 #   --dry-run   Print what would be done without making changes
+#   X.Y.Z       Skip prompt, use this version directly
 
 set -euo pipefail
 
@@ -31,25 +31,59 @@ if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
 fi
 
-# ── 1. Read version ──────────────────────────────────────────
+# ── 1. Read current version and prompt for new one ──────────
 
 if [[ ! -f "$VERSION_FILE" ]]; then
     die "VERSION file not found at $VERSION_FILE"
 fi
 
-VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
+CURRENT_VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
 
-if [[ -z "$VERSION" ]]; then
+if [[ -z "$CURRENT_VERSION" ]]; then
     die "VERSION file is empty"
 fi
 
+# Parse arguments: support version X.Y.Z or --dry-run
+if [[ "${1:-}" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    NEW_VERSION="$1"
+    if [[ "${2:-}" == "--dry-run" ]]; then
+        DRY_RUN=true
+    fi
+elif [[ "$1" == "--dry-run" ]]; then
+    echo "==> Current version: $CURRENT_VERSION"
+    echo -n "==> Enter new version (or press Enter to keep $CURRENT_VERSION): "
+    read -r NEW_VERSION
+    NEW_VERSION="${NEW_VERSION:-$CURRENT_VERSION}"
+elif [[ -n "${1:-}" ]]; then
+    die "Usage: $0 [--dry-run] [X.Y.Z]"
+else
+    echo "==> Current version: $CURRENT_VERSION"
+    echo -n "==> Enter new version (or press Enter to keep $CURRENT_VERSION): "
+    read -r NEW_VERSION
+    NEW_VERSION="${NEW_VERSION:-$CURRENT_VERSION}"
+fi
+
 # Validate semver (X.Y or X.Y.Z)
-if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-    die "'$VERSION' is not a valid version number (expected X.Y.Z or X.Y)"
+if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    die "'$NEW_VERSION' is not a valid version number (expected X.Y.Z or X.Y)"
+fi
+
+VERSION="$NEW_VERSION"
+
+# Write to VERSION file if it changed
+if [[ "$VERSION" != "$CURRENT_VERSION" ]]; then
+    if $DRY_RUN; then
+        echo "  (dry-run) VERSION: $CURRENT_VERSION -> $VERSION"
+    else
+        echo "$VERSION" > "$VERSION_FILE"
+        echo "  VERSION: $CURRENT_VERSION -> $VERSION"
+    fi
+    UPDATED_FILES+=("VERSION")
+else
+    echo "  VERSION: $VERSION (unchanged)"
 fi
 
 TAG="v$VERSION"
-echo "==> VERSION: $VERSION"
 echo "==> Tag:     $TAG"
 echo ""
 
