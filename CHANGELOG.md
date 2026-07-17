@@ -6,6 +6,14 @@ All notable changes to penv will be documented in this file.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [0.2.1] - 2026-07-17
+
+### Added
+
 - `penv list --json` — machine-readable JSON output with env details, total count, storage path, and currently active env
 - `penv init [--yes]` — one-command setup with shell completion, profile hook, systemd service, plugin directory, and default config
 

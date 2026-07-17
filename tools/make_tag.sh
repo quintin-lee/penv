@@ -91,8 +91,6 @@ echo ""
 
 echo "--- Syncing version references ---"
 
-UPDATED_FILES=()
-
 # File list: path → sed expression (captures current version to replace)
 declare -A SYNC
 # shellcheck disable=SC2016

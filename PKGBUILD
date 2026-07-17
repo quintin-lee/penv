@@ -1,6 +1,6 @@
 # VERSION is the single source of truth; update VERSION file only
 pkgname="penv"
-pkgver="0.2.0"
+pkgver="0.2.1"
 pkgrel=1
 pkgdesc="A command-line tool for managing Python virtual environments"
 arch=("any")

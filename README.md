@@ -1,6 +1,6 @@
 # penv — Python Virtual Environment Manager
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/quintin-lee/penv/releases)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/quintin-lee/penv/releases)
 [![License](https://img.shields.io/badge/license-GPL-green.svg)](LICENSE)
 [![CI](https://github.com/quintin-lee/penv/actions/workflows/ci.yml/badge.svg)](https://github.com/quintin-lee/penv/actions/workflows/ci.yml)
 [![ShellCheck](https://img.shields.io/badge/ShellCheck-passing-brightgreen)](https://github.com/quintin-lee/penv/actions/workflows/ci.yml)
