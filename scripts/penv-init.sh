@@ -14,6 +14,23 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv init [--yes]"
+    echo ""
+    echo "One-command penv initialization."
+    echo ""
+    echo "Configures: shell completion, shell profile hook,"
+    echo "systemd service, plugin directory, and config file."
+    echo ""
+    echo "Options:"
+    echo "  --yes, -y     Non-interactive mode"
+    echo ""
+    echo "Examples:"
+    echo "  penv init"
+    echo "  penv init --yes"
+    exit 0
+fi
+
 NON_INTERACTIVE=false
 if [[ "${1:-}" == "--yes" || "${1:-}" == "-y" ]]; then
     NON_INTERACTIVE=true

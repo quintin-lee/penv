@@ -3,6 +3,22 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv activate [<env_name>]"
+    echo ""
+    echo "Activate a virtual environment."
+    echo ""
+    echo "If no name is given and fzf is installed, an interactive"
+    echo "picker is shown."
+    echo ""
+    echo "The activation spawns a sub-shell via expect."
+    echo "Type 'exit' to deactivate."
+    echo ""
+    echo "Example:"
+    echo "  penv activate myproject"
+    exit 0
+fi
+
 # Interactive fzf selection when no argument given
 if [[ $# -eq 0 ]]; then
     if command -v fzf &>/dev/null; then

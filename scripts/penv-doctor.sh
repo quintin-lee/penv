@@ -7,6 +7,23 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv doctor"
+    echo ""
+    echo "Diagnose penv system health."
+    echo ""
+    echo "Checks dependencies (python3, expect, git),"
+    echo "storage directory permissions, activation marker"
+    echo "integrity, environment health, shell completion,"
+    echo "systemd service, and configuration file."
+    echo ""
+    echo "Returns exit code 0 if no failures."
+    echo ""
+    echo "Example:"
+    echo "  penv doctor"
+    exit 0
+fi
+
 PASS=0
 FAIL=0
 WARN=0

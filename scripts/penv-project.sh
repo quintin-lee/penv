@@ -3,6 +3,27 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv project <bind|unbind|show|list> [args]"
+    echo ""
+    echo "Bind projects to virtual environments."
+    echo ""
+    echo "Operations:"
+    echo "  bind <env_name> [--direnv]    Bind current directory to an environment"
+    echo "  unbind                         Remove binding for current directory"
+    echo "  show                           Show current directory binding"
+    echo "  list                           List all project bindings"
+    echo ""
+    echo "With --direnv, generates a .envrc file instead of .penv."
+    echo ""
+    echo "Examples:"
+    echo "  penv project bind myproject"
+    echo "  penv project bind myproject --direnv"
+    echo "  penv project show"
+    echo "  penv project list"
+    exit 0
+fi
+
 # Check arguments
 if [ $# -lt 1 ]
 then

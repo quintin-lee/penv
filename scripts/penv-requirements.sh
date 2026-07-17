@@ -3,6 +3,25 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv requirements <env_name> <export|import> [file]"
+    echo ""
+    echo "Export or import pip requirements for an environment."
+    echo ""
+    echo "Operations:"
+    echo "  export    Export installed packages to requirements.txt"
+    echo "  import    Install packages from requirements.txt"
+    echo ""
+    echo "The default file path is:"
+    echo "  \${VENV_STORAGE_DIR}/<env_name>/requirements.txt"
+    echo ""
+    echo "Examples:"
+    echo "  penv requirements myproject export"
+    echo "  penv requirements myproject export /tmp/reqs.txt"
+    echo "  penv requirements myproject import requirements.txt"
+    exit 0
+fi
+
 # Check arguments
 if [ $# -lt 2 ]
 then

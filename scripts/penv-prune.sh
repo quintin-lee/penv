@@ -11,6 +11,23 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv prune [--force]"
+    echo ""
+    echo "Remove broken virtual environments."
+    echo ""
+    echo "An environment is considered broken if it is missing"
+    echo "the Python interpreter, pyvenv.cfg, or activate script."
+    echo ""
+    echo "Options:"
+    echo "  --force       Skip confirmation prompt"
+    echo ""
+    echo "Examples:"
+    echo "  penv prune"
+    echo "  penv prune --force"
+    exit 0
+fi
+
 FORCE=false
 if [[ "${1:-}" == "--force" ]]; then
     FORCE=true

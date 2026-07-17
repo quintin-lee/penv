@@ -3,6 +3,25 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv list [--sort-by=name|date] [<filter>] [--json]"
+    echo ""
+    echo "List all virtual environments."
+    echo ""
+    echo "Options:"
+    echo "  --sort-by=name    Sort alphabetically (default)"
+    echo "  --sort-by=date    Sort by creation date"
+    echo "  --json            Output in JSON format"
+    echo "  <filter>          Filter by environment name pattern"
+    echo ""
+    echo "Examples:"
+    echo "  penv list"
+    echo "  penv list --sort-by=date"
+    echo "  penv list myproj"
+    echo "  penv list --json"
+    exit 0
+fi
+
 # Default values
 SORT_BY="name"
 FILTER_PATTERN=""

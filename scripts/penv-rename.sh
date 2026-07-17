@@ -4,6 +4,19 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv rename <old_name> <new_name>"
+    echo ""
+    echo "Rename a virtual environment."
+    echo ""
+    echo "This also updates activation markers and"
+    echo "project bindings that reference the old name."
+    echo ""
+    echo "Example:"
+    echo "  penv rename myproject myproject2"
+    exit 0
+fi
+
 if [[ $# -lt 2 ]]; then
     die "Please specify the source and new names."
     echo "Usage: penv rename <old_name> <new_name>"

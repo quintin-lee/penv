@@ -4,6 +4,20 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv remove <env_name> [env_name2 ...]"
+    echo ""
+    echo "Remove one or more virtual environments."
+    echo ""
+    echo "If no name is given and fzf is installed, an interactive"
+    echo "multi-select picker is shown."
+    echo ""
+    echo "Examples:"
+    echo "  penv remove myproject"
+    echo "  penv remove oldproject myproject testproject"
+    exit 0
+fi
+
 # Helper: remove a single validated environment
 _remove_one() {
     local env_name="$1"

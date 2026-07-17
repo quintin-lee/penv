@@ -4,6 +4,21 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv export <env_name> [output_file]"
+    echo ""
+    echo "Archive a virtual environment as a gzipped tarball."
+    echo ""
+    echo "Includes environment metadata (Python version,"
+    echo "creation date) and all installed packages."
+    echo ""
+    echo "Default output: <env_name>.tar.gz"
+    echo ""
+    echo "Example:"
+    echo "  penv export myproject myproject-venv.tar.gz"
+    exit 0
+fi
+
 if [[ $# -lt 1 ]]; then
     die "Usage: penv export <env_name> [output_file]"
 fi

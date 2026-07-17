@@ -3,6 +3,24 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv clone <source_env> <dest_env> [description]"
+    echo ""
+    echo "Clone a virtual environment to a new one."
+    echo ""
+    echo "Arguments:"
+    echo "  source_env    Name of the environment to clone"
+    echo "  dest_env      Name for the new environment"
+    echo "  description   Optional description (default: \"Cloned from <source>\")"
+    echo ""
+    echo "The clone includes all installed packages and"
+    echo "fixes hardcoded paths in the new environment."
+    echo ""
+    echo "Example:"
+    echo "  penv clone myproject myproject-backup"
+    exit 0
+fi
+
 # Check arguments
 if [ $# -lt 2 ]
 then

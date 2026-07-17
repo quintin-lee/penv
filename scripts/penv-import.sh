@@ -4,6 +4,22 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv import <archive> [new_name]"
+    echo ""
+    echo "Restore a virtual environment from a tarball."
+    echo ""
+    echo "If new_name is omitted, the name from the archive"
+    echo "metadata is used."
+    echo ""
+    echo "Fixes hardcoded paths in the restored environment."
+    echo ""
+    echo "Examples:"
+    echo "  penv import myproject-venv.tar.gz"
+    echo "  penv import myproject-venv.tar.gz renamed-project"
+    exit 0
+fi
+
 if [[ $# -lt 1 ]]; then
     die "Usage: penv import <archive> [new_name]"
 fi

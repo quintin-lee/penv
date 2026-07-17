@@ -4,6 +4,19 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv info <env_name>"
+    echo ""
+    echo "Show detailed information about a virtual environment."
+    echo ""
+    echo "Output includes: Python version, path, disk usage,"
+    echo "package count, creation date, and activation status."
+    echo ""
+    echo "Example:"
+    echo "  penv info myproject"
+    exit 0
+fi
+
 if [[ $# -eq 0 ]]; then
     die "Please specify the virtual environment name."
     echo "Usage: penv info <env_name>"

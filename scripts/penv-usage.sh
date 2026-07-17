@@ -3,6 +3,21 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv usage [--sort-by=size|name]"
+    echo ""
+    echo "Show disk usage of virtual environments."
+    echo ""
+    echo "Options:"
+    echo "  --sort-by=size    Sort by disk usage (default)"
+    echo "  --sort-by=name    Sort alphabetically"
+    echo ""
+    echo "Example:"
+    echo "  penv usage"
+    echo "  penv usage --sort-by=size"
+    exit 0
+fi
+
 # Set default sort order
 SORT_BY="size"
 

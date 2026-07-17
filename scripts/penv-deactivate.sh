@@ -3,6 +3,19 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv deactivate"
+    echo ""
+    echo "Deactivate the current virtual environment."
+    echo ""
+    echo "Decrements the activation counter and cleans up"
+    echo "the activation marker."
+    echo ""
+    echo "Example:"
+    echo "  penv deactivate"
+    exit 0
+fi
+
 # Use ps command to get the parent process PID
 PARENT_PID=$(ps -o ppid= -p $$)
 PARENT_PID=$(ps -o ppid= -p "$PARENT_PID" | cut -f2)

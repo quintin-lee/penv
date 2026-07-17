@@ -6,6 +6,19 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv upgrade"
+    echo ""
+    echo "Self-update penv from the latest GitHub release."
+    echo ""
+    echo "Detects installation type (git checkout, system"
+    echo "package, or manual install) and updates accordingly."
+    echo ""
+    echo "Example:"
+    echo "  penv upgrade"
+    exit 0
+fi
+
 # ── Read current version ──
 CURRENT_VERSION=""
 if [[ -f "${PROJECT_ROOT}/VERSION" ]]; then

@@ -4,6 +4,27 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv config [list|get|set]"
+    echo ""
+    echo "Manage penv configuration."
+    echo ""
+    echo "Operations:"
+    echo "  list              List all configuration settings"
+    echo "  get <key>         Get a configuration value"
+    echo "  set <key> <value> Set a configuration value"
+    echo ""
+    echo "Settings:"
+    echo "  default_python    Default Python executable"
+    echo "  storage_dir       Override the storage directory"
+    echo ""
+    echo "Examples:"
+    echo "  penv config list"
+    echo "  penv config set default_python python3.11"
+    echo "  penv config get storage_dir"
+    exit 0
+fi
+
 CONFIG_DIR="${HOME}/.config/penv"
 CONFIG_FILE="${CONFIG_DIR}/config"
 

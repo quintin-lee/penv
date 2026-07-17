@@ -4,6 +4,21 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv plugin [list]"
+    echo ""
+    echo "List installed plugins."
+    echo ""
+    echo "Plugins are executable .sh scripts in:"
+    echo "  ~/.config/penv/plugins/"
+    echo ""
+    echo "The filename (without .sh) becomes the command name."
+    echo ""
+    echo "Example:"
+    echo "  penv plugin list"
+    exit 0
+fi
+
 # Default plugin directory if not set
 PENV_PLUGIN_DIR="${PENV_PLUGIN_DIR:-${HOME}/.config/penv/plugins}"
 

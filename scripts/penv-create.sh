@@ -3,6 +3,23 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv create <env_name> [description]"
+    echo ""
+    echo "Create a new Python virtual environment."
+    echo ""
+    echo "Arguments:"
+    echo "  env_name      Name of the virtual environment"
+    echo "  description   Optional description for the environment"
+    echo ""
+    echo "The environment is created under:"
+    echo "  \${VENV_STORAGE_DIR}/<env_name>/"
+    echo ""
+    echo "Example:"
+    echo "  penv create myproject \"My Python project\""
+    exit 0
+fi
+
 # Ensure virtual environment storage directory exists
 if [ ! -d "${VENV_STORAGE_DIR}" ]; then
     if ! mkdir -p "${VENV_STORAGE_DIR}"; then

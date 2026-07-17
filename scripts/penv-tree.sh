@@ -4,6 +4,19 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv tree <env_name>"
+    echo ""
+    echo "Display package dependency tree for an environment."
+    echo ""
+    echo "Uses pipdeptree if available for a full tree,"
+    echo "otherwise shows a flat list of installed packages."
+    echo ""
+    echo "Example:"
+    echo "  penv tree myproject"
+    exit 0
+fi
+
 if [[ $# -lt 1 ]]; then
     die "Usage: penv tree <env_name>"
 fi

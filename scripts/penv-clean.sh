@@ -3,6 +3,18 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 source "${SCRIPT_DIR}/env.sh"
 
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: penv clean"
+    echo ""
+    echo "Deactivate all active virtual environments."
+    echo ""
+    echo "Removes all activation markers and PID files."
+    echo ""
+    echo "Example:"
+    echo "  penv clean"
+    exit 0
+fi
+
 # Use arrays for safer file iteration
 ACTIVATE_FILES=("${VENV_STORAGE_DIR}"/*.activate)
 PID_FILES=("${VENV_STORAGE_DIR}"/*.pid)
