@@ -22,6 +22,9 @@ package() {
     # Copy main executable
     cp -r "${srcdir}/penv" "${pkgdir}/usr/local/penv/"
     
+    # Copy VERSION file (required for --version and Makefile/VERSION integration)
+    cp "${srcdir}/VERSION" "${pkgdir}/usr/local/penv/"
+    
     # Copy scripts
     cp -r "${srcdir}/scripts" "${pkgdir}/usr/local/penv/"
     

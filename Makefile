@@ -39,9 +39,9 @@ deb: clean-deb
 
 # ── Distribution tarball ────────────────────────────────────────────
 
-penv.tar.gz: penv scripts/*.sh scripts/*.exp scripts/penv-completion.bash scripts/penv.service
-	@echo "==> Creating distribution tarball..."
-	@tar zcf $@ penv scripts
+penv.tar.gz: penv scripts/*.sh scripts/*.exp scripts/penv-completion.bash scripts/penv-completion.fish scripts/penv.service VERSION
+	@echo "==> Creating distribution tarball (version $(VERSION))..."
+	@tar zcf $@ penv scripts VERSION
 
 dist: penv.tar.gz
 	@echo "Distribution tarball created: penv.tar.gz"
@@ -53,6 +53,7 @@ install:
 	@install -d "$(DESTDIR)/usr/local/bin"
 	@install -d "$(DESTDIR)/usr/local/penv/scripts"
 	@install -m 755 penv "$(DESTDIR)/usr/local/penv/"
+	@install -m 644 VERSION "$(DESTDIR)/usr/local/penv/"
 	@ln -sf "/usr/local/penv/penv" "$(DESTDIR)/usr/local/bin/penv"
 	@for f in scripts/*.sh scripts/*.exp; do \
 		install -m 755 "$$f" "$(DESTDIR)/usr/local/penv/scripts/"; \

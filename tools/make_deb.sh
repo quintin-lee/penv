@@ -21,6 +21,7 @@ ZSH_COMPLETION_DIR=${DIST_DIR}/usr/share/zsh/site-functions
 
 # copy files to dist
 cp "${SCRIPT_DIR}/penv" "${OPT_DIR}"
+cp "${SCRIPT_DIR}/VERSION" "${OPT_DIR}"
 cp -r "${SCRIPT_DIR}/scripts" "${OPT_DIR}"
 
 cp "${SCRIPT_DIR}/scripts/penv.service" "${SERVICE_DIR}"

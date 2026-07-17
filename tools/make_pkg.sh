@@ -6,7 +6,7 @@ PENV_TAR=${SCRIPT_DIR}/penv.tar.gz
 # create penv.tar.gz
 [ -f "${PENV_TAR}" ] && rm -f "${PENV_TAR}"
 
-(cd "$SCRIPT_DIR" || exit; tar zcvf "${PENV_TAR}" penv scripts)
+(cd "$SCRIPT_DIR" || exit; tar zcvf "${PENV_TAR}" penv scripts VERSION)
 
 # generate pkg
 makepkg -f
