@@ -6,6 +6,7 @@ source "${SCRIPT_DIR}/env.sh"
 # Default values
 SORT_BY="name"
 FILTER_PATTERN=""
+OUTPUT_MODE="table"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -16,9 +17,12 @@ while [[ $# -gt 0 ]]; do
         --filter=*)
             FILTER_PATTERN="${1#*=}"
             ;;
+        --json)
+            OUTPUT_MODE="json"
+            ;;
         *)
             die "Unknown option: $1"
-            echo "Usage: penv list [--sort-by=name|date] [--filter=pattern]"
+            echo "Usage: penv list [--sort-by=name|date] [--filter=pattern] [--json]"
             ;;
     esac
     shift
@@ -108,12 +112,24 @@ do
     fi
 done
 
+# JSON-encode a string (escape \ and ")
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    printf "%s" "$s"
+}
+
 # If no virtual environments found, show message
 if [ ${#ENV_LIST[@]} -eq 0 ]; then
-    if [[ -n "$FILTER_PATTERN" ]]; then
-        echo "No virtual environments found matching pattern: $FILTER_PATTERN"
+    if [[ "$OUTPUT_MODE" == "json" ]]; then
+        echo "{\"environments\":[],\"total\":0,\"storage_dir\":\"$(json_escape "$VENV_STORAGE_DIR")\"}"
     else
-        echo "No virtual environments found."
+        if [[ -n "$FILTER_PATTERN" ]]; then
+            echo "No virtual environments found matching pattern: $FILTER_PATTERN"
+        else
+            echo "No virtual environments found."
+        fi
     fi
     exit 0
 fi
@@ -130,6 +146,35 @@ else
 fi
 
 unset IFS
+
+# JSON output mode
+if [[ "$OUTPUT_MODE" == "json" ]]; then
+    echo -n '{"environments":['
+    first=true
+    for env_name in "${ENV_LIST[@]}"; do
+        $first || echo -n ','
+        first=false
+        DESCRIPTION=${ENV_DESCRIPTIONS[$env_name]}
+        PYTHON_VERSION=${ENV_PYTHON_VERSIONS[$env_name]}
+        ACTIVATED=${ENV_ACTIVATED[$env_name]}
+        SIZE=$(du -sh "${VENV_STORAGE_DIR}/${env_name}/" 2>/dev/null | cut -f1)
+        echo -n "{\"name\":\"$(json_escape "$env_name")\""
+        echo -n ",\"python\":\"$(json_escape "$PYTHON_VERSION")\""
+        echo -n ",\"activated\":${ACTIVATED}"
+        echo -n ",\"size\":\"$(json_escape "$SIZE")\""
+        if [[ -n "$DESCRIPTION" ]]; then
+            echo -n ",\"description\":\"$(json_escape "$DESCRIPTION")\""
+        fi
+        echo -n '}'
+    done
+    echo -n "],\"total\":${#ENV_LIST[@]}"
+    echo -n ",\"storage_dir\":\"$(json_escape "$VENV_STORAGE_DIR")\""
+    if [[ -n "$CURRENT_ENV" ]]; then
+        echo -n ",\"currently_active\":\"$(json_escape "$CURRENT_ENV")\""
+    fi
+    echo '}'
+    exit 0
+fi
 
 # Print header with enhanced formatting
 echo "Virtual environments in '${VENV_STORAGE_DIR}':"

@@ -6,11 +6,12 @@ All notable changes to penv will be documented in this file.
 
 ### Added
 
-_No unreleased changes yet._
+- `penv list --json` — machine-readable JSON output with env details, total count, storage path, and currently active env
 
 ### Changed
 
-_No unreleased changes yet._
+- `penv help` output now groups commands into categories (Lifecycle, Activation, Information, Dependencies, Project, Archive, Maintenance)
+- `penv list` usage updated to show `--json` option
 
 ### Fixed
 

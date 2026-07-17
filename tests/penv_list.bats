@@ -79,3 +79,42 @@ PENV_LIST="${BATS_TEST_DIRNAME}/../scripts/penv-list.sh"
     run "$PENV_LIST" --bogus
     [ "$status" -eq 1 ]
 }
+
+@test "list: --json outputs valid JSON for empty list" {
+    run "$PENV_LIST" --json
+    [ "$status" -eq 0 ]
+    # Should be valid JSON structure
+    [[ "$output" == *'"environments":'* ]]
+    [[ "$output" == *'"total":0'* ]]
+    [[ "$output" == *'"storage_dir":'* ]]
+}
+
+@test "list: --json includes environment details" {
+    fake_env testenv
+    run "$PENV_LIST" --json
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'"name":"testenv"'* ]]
+    [[ "$output" == *'"total":1'* ]]
+}
+
+@test "list: --json multiple environments" {
+    fake_env alpha
+    fake_env beta
+    run "$PENV_LIST" --json
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'"name":"alpha"'* ]]
+    [[ "$output" == *'"name":"beta"'* ]]
+    [[ "$output" == *'"total":2'* ]]
+}
+
+@test "list: --json respects --filter" {
+    fake_env project-alpha
+    fake_env project-beta
+    fake_env personal
+    run "$PENV_LIST" --json --filter=project-
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'"name":"project-alpha"'* ]]
+    [[ "$output" == *'"name":"project-beta"'* ]]
+    [[ "$output" != *'"name":"personal"'* ]]
+    [[ "$output" == *'"total":2'* ]]
+}
