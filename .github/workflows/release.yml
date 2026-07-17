@@ -65,7 +65,7 @@ jobs:
             -w /work \
             archlinux:latest \
             /bin/bash -c "
-              pacman -Syu --noconfirm base-devel sudo &&
+              pacman -Syu --noconfirm base-devel sudo expect python &&
               useradd -m builder &&
               echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers &&
               chown -R builder:builder /work &&
