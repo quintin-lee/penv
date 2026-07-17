@@ -90,8 +90,8 @@ EOF
     list)
         echo "Searching for project bindings..."
         # Find all .penv files in subdirectories
-        if find "${HOME}" -name ".penv" -type f 2>/dev/null | grep . > /dev/null; then
-            find "${HOME}" -name ".penv" -type f 2>/dev/null | while read -r penv_file; do
+        if find "${HOME}" -maxdepth 3 -name ".penv" -type f 2>/dev/null | grep . > /dev/null; then
+            find "${HOME}" -maxdepth 3 -name ".penv" -type f 2>/dev/null | while read -r penv_file; do
                 project_dir=$(dirname "$penv_file")
                 env_name=$(cat "$penv_file")
                 echo "$project_dir -> $env_name"
