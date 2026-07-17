@@ -1,55 +1,63 @@
-# Python3 venv Management
+# penv — Python Virtual Environment Manager
 
-[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/quintin-lee/penv/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/quintin-lee/penv/releases)
 [![License](https://img.shields.io/badge/license-GPL-green.svg)](LICENSE)
 [![CI](https://github.com/quintin-lee/penv/actions/workflows/ci.yml/badge.svg)](https://github.com/quintin-lee/penv/actions/workflows/ci.yml)
+[![ShellCheck](https://img.shields.io/badge/ShellCheck-passing-brightgreen)](https://github.com/quintin-lee/penv/actions/workflows/ci.yml)
 [![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://github.com/quintin-lee/penv)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-**penv** is a command-line tool for managing Python virtual environments. It simplifies the creation, activation, deletion, cloning, and other operations of Python `venv` environments — all from the terminal, with no extra dependencies beyond Python 3 and bash.
+**penv** is a command-line tool for managing Python virtual environments. It simplifies creation, activation, cloning, archiving, and cleanup of `venv` environments — all from the terminal with no extra Python dependencies.
+
+```shell
+# Quick start
+penv create myproject "My Python project"
+penv activate myproject       # spawns a sub-shell with venv active
+pip install requests
+penv deactivate
+penv list                     # shows all environments
+```
 
 ---
 
 ## Table of Contents
 
-- [Quick Start](#quick-start)
+- [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Command Overview](#command-overview)
-  - [Managing Environments](#managing-environments)
-  - [Project Binding & Auto-activation](#project-binding--auto-activation)
-  - [Disk Usage](#disk-usage)
+  - [Lifecycle](#lifecycle)
+  - [Activation](#activation)
+  - [Information](#information)
+  - [Dependencies](#dependencies)
+  - [Project Integration](#project-integration)
+  - [Archive & Transfer](#archive--transfer)
+  - [Maintenance](#maintenance)
+- [Shell Completion](#shell-completion)
 - [How It Works](#how-it-works)
 - [Configuration](#configuration)
 - [Development](#development)
-  - [Packaging](#packaging)
-- [Contributing](#contributing)
+- [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## Quick Start
+## Features
 
-```shell
-# Create an environment
-penv create myproject "My Python project"
-
-# Activate it
-penv activate myproject
-
-# List all environments
-penv list
-
-# Install packages, run code...
-pip install requests
-python my_script.py
-
-# Deactivate when done
-penv deactivate
-```
-
-All environments are stored under `~/.cache/python-venv/` by default.
+- **36 commands** across 7 categories — full venv lifecycle management
+- **JSON output** (`penv list --json`) — for IDE and script integration
+- **Interactive pickers** — fuzzy-finder integration (`fzf`) for activate/remove
+- **direnv integration** — auto-generate `.envrc` files for directory-based activation
+- **Plugins** — extend penv with custom commands in `~/.config/penv/plugins/`
+- **Self-upgrade** — `penv upgrade` fetches the latest release from GitHub
+- **Environment archiving** — export/import whole environments as tarballs
+- **Health diagnostics** — `penv doctor` checks everything from dependencies to stale markers
+- **Automated cleanup** — `penv prune` removes broken environments
+- **Shell completion** — bash, zsh, and fish
+- **Systemd integration** — auto-clean stale activation markers
+- **Python version selection** — interactive picker on `create`
+- **CI/CD ready** — ShellCheck, 93+ bats tests, automated Release pipeline
 
 ---
 
@@ -57,406 +65,400 @@ All environments are stored under `~/.cache/python-venv/` by default.
 
 ### Prerequisites
 
-- **Bash 4.0+** (required for associative arrays and other features)
-- **Python 3** with `venv` module
+- **Python 3** with `venv` module (`python3 -m venv`)
 - **expect** (required for `penv activate`)
-- **make** (optional — for using the Makefile)
+- **coreutils** (`realpath`, `timeout`)
 
-### Method 1: Build Packages with Makefile (Recommended)
+### Method 1: `penv init` (Recommended)
 
-The project provides a Makefile to manage all packaging workflows:
+After adding penv to your PATH, run the initialization tool:
+
+```shell
+penv init
+```
+
+It detects your shell (bash/zsh/fish), installs completion, adds the auto-activation hook to your profile, enables the systemd service, creates the plugin directory, and generates a default config. Supports `--yes` for non-interactive mode.
+
+### Method 2: Build Packages
 
 ```shell
 # Build both ArchLinux and Debian packages
 make
 
-# Build only ArchLinux package
+# ArchLinux only
 make pkg
 
-# Build only Debian package
+# Debian/Ubuntu only
 make deb
 ```
 
-See the [Packaging](#packaging) section for all available targets.
-
-### Method 2: ArchLinux / Manjaro (PKGBUILD)
+### Method 3: ArchLinux PKGBUILD
 
 ```shell
 bash tools/make_pkg.sh
-```
-
-This creates an installable `.pkg.tar.zst` package. Install it with:
-
-```shell
 sudo pacman -U penv-*.pkg.tar.zst
 ```
 
-### Method 3: Debian / Ubuntu
+### Method 4: Debian/Ubuntu
 
 ```shell
-# sudo password is required during execution
 bash tools/make_deb.sh
+sudo dpkg -i penv_*.deb
 ```
 
-The `.deb` package will be generated in the project root.
-
-### Method 4: Direct Installation
+### Method 5: Direct Install
 
 ```shell
-make install
-```
-
-Or manually:
-
-```shell
-# Clone the repo
 git clone https://github.com/quintin-lee/penv.git
 cd penv
-
-# Add to PATH (temporary)
-export PATH="$PWD:$PATH"
-
-# Or install to a system location
 sudo make install
 ```
 
-### Method 5: Download Release
+### Upgrade
 
-1. Visit the [Releases page](https://github.com/quintin-lee/penv/releases)
-2. Download the latest version for your system
-3. Extract and add the `penv` script to your `PATH`
+```shell
+penv upgrade                      # self-update from GitHub Release
+```
 
 ---
 
 ## Usage
 
-### Command Overview
+All commands follow `penv <command> [arguments]`.
+
+### Lifecycle
 
 | Command | Description |
 |---|---|
-| `penv create <name> [desc]` | Create a new virtual environment |
-| `penv list [--sort-by=name\|date] [--filter=pattern]` | List all virtual environments |
-| `penv remove <name>` | Remove a virtual environment |
-| `penv activate <name>` | Activate a virtual environment |
-| `penv deactivate` | Deactivate the current environment |
-| `penv show` | Show active environments |
-| `penv clean` | Deactivate all environments |
-| `penv clone <src> <dst> [desc]` | Clone an environment |
-| `penv requirements <name> <export\|import> [file]` | Export/import pip packages |
-| `penv project <bind\|unbind\|show\|list>` | Bind projects to environments |
-| `penv usage [--sort-by=size\|name]` | Show disk usage |
-| `penv help [command]` | Show help for a specific command |
-| `penv --version` | Show version |
-
-### Managing Environments
-
-#### Create
+| `penv create <name> [desc]` | Create a virtual environment (with optional description) |
+| `penv clone <src> <dst> [desc]` | Clone an environment, rewrite hardcoded paths |
+| `penv remove <name>` | Remove an environment |
+| `penv rename <old> <new>` | Rename and update all internal references |
 
 ```shell
-penv create myproject
-penv create myproject "My Python project"  # with description
+penv create myproject "API service"
+penv clone myproject myproject-backup
+penv rename myproject myproject-v2
+penv remove myproject-backup
 ```
 
-During creation, you will be prompted to select a Python version if multiple are detected.
+### Activation
 
-#### List
+| Command | Description |
+|---|---|
+| `penv activate <name>` | Spawn a sub-shell with the environment active (fzf picker if name omitted) |
+| `penv deactivate` | Decrement activation counter |
+| `penv show` | Show which environments are currently active |
+| `penv clean` | Deactivate all environments and clean up markers |
+
+Activation spawns a **sub-shell**. Type `exit` to return to your original shell — this automatically triggers deactivation.
 
 ```shell
-penv list
-penv list --sort-by=date                    # sort by creation date
-penv list --filter=test                     # filter by name pattern
+penv activate            # fzf interactive picker (if fzf installed)
+penv activate myproject  # direct activation
+penv show                # see active envs
+penv deactivate          # deactivate one level
+penv clean               # deactivate everything
 ```
 
-Active environments are highlighted in **green**.
+### Information
 
-#### Activate / Deactivate
+| Command | Description |
+|---|---|
+| `penv list` | List all environments (sorted, filtered, or JSON) |
+| `penv info <name>` | Detailed info: Python version, path, size, packages, activation status |
+| `penv usage [--sort-by=size\|name]` | Disk usage report per environment |
+| `penv tree <name>` | Package dependency tree |
+| `penv doctor` | Full system health diagnostics |
 
 ```shell
-penv activate myproject    # spawns a new shell with the environment active
-penv deactivate            # decrements the activation counter
-penv show                  # show which environments are active
-penv clean                 # deactivate everything and clean up
+penv list                       # formatted table
+penv list --json                # machine-readable JSON
+penv list --sort-by=date        # sort by creation date
+penv list --filter=test         # filter by name pattern
+penv info myproject             # detailed env info
+penv usage --sort-by=name       # disk usage sorted alphabetically
+penv tree myproject             # dependency tree
+penv doctor                     # system health check
 ```
 
-> Note: `penv activate` spawns a **sub-shell** with the virtual environment activated. Type `exit` to return to your original shell — this automatically deactivates the environment.
+### Dependencies
 
-#### Clone
-
-```shell
-penv clone myproject newproject
-penv clone myproject newproject "New project based on myproject"
-```
-
-Hardcoded paths in the cloned environment's `bin/` directory are automatically rewritten.
-
-#### Remove
+| Command | Description |
+|---|---|
+| `penv requirements <name> export [file]` | Export pip packages (to env dir or file) |
+| `penv requirements <name> import <file>` | Import pip packages from file |
 
 ```shell
-penv remove myproject
-```
-
-A safety check ensures removal only happens within the expected storage directory.
-
-#### Requirements
-
-```shell
-penv requirements myproject export              # writes to environment's own requirements.txt
+penv requirements myproject export              # writes to env's own requirements.txt
 penv requirements myproject export /path/to/file
 penv requirements myproject import /path/to/file
 ```
 
-### Project Binding & Auto-activation
+### Project Integration
 
-Project binding links a directory to a virtual environment, enabling directory-based auto-activation.
-
-#### Bind a Project
-
-```shell
-cd /path/to/my/project
-penv project bind myproject        # creates a .penv file
-```
-
-#### Show / Unbind
+| Command | Description |
+|---|---|
+| `penv project bind <name> [--direnv]` | Bind current directory to an environment |
+| `penv project unbind` | Remove binding |
+| `penv project show` | Show binding for current directory |
+| `penv project list` | List all bindings under `$HOME` |
 
 ```shell
-penv project show                  # show binding for current directory
-penv project unbind                # remove binding
-penv project list                  # list all bindings under $HOME
+cd /my/project
+penv project bind myproject         # creates .penv file
+penv project bind myproject --direnv  # generates .envrc + runs direnv allow
 ```
 
-#### Enable Auto-activation
+### Archive & Transfer
 
-Add to your `~/.bashrc` or `~/.zshrc`:
+| Command | Description |
+|---|---|
+| `penv export <name> [file]` | Package environment as a gzipped tarball |
+| `penv import <archive> [name]` | Restore environment from tarball |
 
-```bash
-source /path/to/penv/scripts/penv-auto-activate.sh
-
-# Then manually activate:
-cd /path/to/my/project
-penv_auto_activate
-
-# Or for automatic activation on cd, uncomment the cd() override in the script:
-# cd() { _penv_cd_hook "$@"; }
+```shell
+penv export myproject myproject.tar.gz     # archive with metadata
+penv import myproject.tar.gz               # restore, auto-paths fixed
+penv import myproject.tar.gz newname       # restore with a different name
 ```
 
-### Enable Command Completion
+### Maintenance
 
-#### Bash
+| Command | Description |
+|---|---|
+| `penv config [list\|get\|set]` | Manage configuration (`~/.config/penv/config`) |
+| `penv upgrade` | Self-update from GitHub Releases |
+| `penv prune [--force]` | Remove broken environments |
+| `penv plugin [list]` | List installed plugins |
+| `penv init` | One-command initial setup (completion, profile, systemd, plugins) |
+
+```shell
+penv config set default_python python3.11
+penv config list
+penv upgrade                    # auto-detect git/system/custom install
+penv prune --force              # remove broken envs without confirmation
+penv plugin list                # ~/.config/penv/plugins/*.sh
+```
+
+---
+
+## Shell Completion
+
+penv provides completion for all major shells.
+
+### Bash
 
 ```bash
-# Add to ~/.bashrc:
 source /path/to/penv/scripts/penv-completion.bash
 ```
 
-#### Zsh
+### Zsh
 
 ```zsh
-# Add to ~/.zshrc:
 autoload -Uz compinit bashcompinit
 compinit
 bashcompinit
 source /path/to/penv/scripts/penv-completion.bash
 ```
 
-### Disk Usage
+### Fish
 
-```shell
-penv usage                          # sorted by size (largest first)
-penv usage --sort-by=name           # sorted alphabetically
+```fish
+cp /path/to/penv/scripts/penv-completion.fish ~/.config/fish/completions/
 ```
+
+Or simply run `penv init` to install everything automatically.
 
 ---
 
 ## How It Works
 
 ```
-┌──────────┐    command dispatch     ┌──────────────────────┐
-│  penv    │ ──────────────────────►  │ scripts/penv-*.sh   │
-│ (entry)  │                         │ (subcommand modules) │
-└──────────┘                         └──────────┬───────────┘
-                                                │ source
-                                                ▼
-                                        ┌──────────────┐
-                                        │  env.sh      │
-                                        │  VENV_STORAGE │
-                                        └──────────────┘
+┌──────────┐    dynamic dispatch      ┌──────────────────────┐
+│  penv    │ ──► file exists? ──►     │ scripts/penv-*.sh   │
+│ (entry)  │     yes: execute         │ (36 subcommand mods) │
+└──────────┘     no:  plugin fallback └──────────┬───────────┘
+        │           to PENV_PLUGIN_DIR/           │ source
+        │                                         ▼
+        │                                  ┌──────────────┐
+        │                                  │  env.sh      │
+        │                                  │  VENV_STORAGE│
+        │                                  │  PENV_PLUGIN │
+        │                                  │  config load │
+        │                                  └──────────────┘
+        │
+        ▼
+  ┌────────────────┐
+  │ ~/.config/penv/│
+  │  plugins/*.sh  │ ◄── custom commands auto-discovered
+  └────────────────┘
 ```
 
 ### Key Concepts
 
-- **Storage**: All environments are stored in `~/.cache/python-venv/`. Each environment is a standard Python venv directory.
-
-- **Activation Tracking**: When activated, two marker files are created:
-  - `<env_name>.activate` — reference count for the environment (supports multiple shells)
-  - `<pid>.pid` — shell process ID for cleanup
-
-- **Activation Flow**: `penv activate` uses `expect` to spawn a sub-shell, `source` the venv's `activate` script, and enter interactive mode. When you `exit` the sub-shell, the reference count is decremented.
-
-- **Auto-cleanup**: A systemd service (`penv.service`) runs `auto-clean.sh` every 60 seconds to clean up stale activation markers.
-
-- **Python Version Selection**: On `create`, `select_version.sh` scans common paths (`/usr/bin`, `/usr/local/bin`, `/opt`, `~/.local/bin`) for Python executables and presents an interactive menu.
+- **Dynamic dispatch**: Any executable `scripts/penv-<name>.sh` automatically registers as a command. No hardcoded registrations.
+- **Plugin system**: Place executable `.sh` files in `~/.config/penv/plugins/` — they become `penv <filename>` commands automatically.
+- **Storage**: Environments live under `~/.cache/python-venv/` by default (configurable). Each is a standard Python `venv` directory.
+- **Activation tracking**: Marker files (`<env>.activate`, `<pid>.pid`) track active sessions for safe multi-shell usage.
+- **Activation flow**: `penv activate` uses `expect` to spawn a sub-shell that sources the venv's `activate` script. Exiting the sub-shell decrements the reference count and cleans up.
+- **Config**: Key=value file at `~/.config/penv/config` loaded by `env.sh` on every invocation. Supports `storage_dir` and `default_python`.
+- **Auto-cleanup**: Optional `penv.service` (systemd) runs every 60 seconds to clean stale activation markers.
+- **Python version selection**: `select_version.sh` scans common paths and presents an interactive menu on `create`.
 
 ---
 
 ## Configuration
 
+### Environment Variables
+
 | Variable | Default | Description |
 |---|---|---|
-| `VENV_STORAGE_DIR` | `~/.cache/python-venv` | Directory where virtual environments are stored |
+| `VENV_STORAGE_DIR` | `~/.cache/python-venv` | Virtual environment storage directory |
+| `PENV_PLUGIN_DIR` | `~/.config/penv/plugins` | Plugin directory |
+| `PENV_DEFAULT_PYTHON` | *(system default)* | Default Python for `penv create` |
 
-Override by exporting before running commands:
+### Config File (`~/.config/penv/config`)
+
+```ini
+# Persistent configuration
+default_python = python3.11
+storage_dir = /custom/venv/path
+```
+
+Manage via `penv config`:
 
 ```shell
-export VENV_STORAGE_DIR="/path/to/custom/dir"
-penv create myproject
+penv config list
+penv config get default_python
+penv config set default_python python3.11
 ```
 
 ---
 
 ## Development
 
-### Prerequisites
-
-- Bash 4.0+
-- Python 3
-- `expect` (for activate command)
-- `coreutils` (for `realpath`, `timeout`)
-
 ### Project Structure
 
 ```
-├── penv                          # Entry point — command dispatcher
-├── scripts/                      # Subcommand implementations
-│   ├── env.sh                    # Shared environment configuration
-│   ├── penv-create.sh            # Create virtual environment
-│   ├── penv-list.sh              # List environments
-│   ├── penv-remove.sh            # Remove environment
-│   ├── penv-activate.sh          # Activate (delegates to expect)
-│   ├── penv-deactivate.sh        # Deactivate
-│   ├── penv-show.sh              # Show active environments
-│   ├── penv-clean.sh             # Clean all active environments
-│   ├── penv-clone.sh             # Clone environment
-│   ├── penv-requirements.sh      # Export/import requirements
-│   ├── penv-project.sh           # Project binding
-│   ├── penv-usage.sh             # Disk usage report
-│   ├── penv-auto-activate.sh     # Shell integration for auto-activation
-│   ├── penv-completion.bash      # Bash completion
-│   ├── activate.exp              # Expect script for activation
-│   ├── select_version.sh         # Interactive Python version picker
-│   ├── auto-clean.sh             # Periodic cleanup daemon
-│   └── penv.service              # systemd service unit
-├── Makefile                       # Build orchestration (pkg/deb/install/clean)
+├── penv                               # Entry point — dynamic command dispatcher
+├── VERSION                            # Single source of truth for version
+├── Makefile                           # Build orchestration (pkg/deb/test/install)
+├── scripts/
+│   ├── env.sh                         # Shared env vars, die(), config loader
+│   ├── penv-*.sh                      # 36 subcommand implementations
+│   ├── activate.exp                   # Expect script for venv activation
+│   ├── select_version.sh              # Interactive Python version picker
+│   ├── auto-clean.sh                  # Periodic stale marker cleanup daemon
+│   ├── penv-auto-activate.sh          # Shell profile integration
+│   ├── penv-completion.bash           # Bash/Zsh completion
+│   └── penv-completion.fish           # Fish completion
+├── tests/
+│   ├── setup.bash                     # Shared test helpers
+│   └── penv_*.bats                   # 93+ bats test cases
 ├── tools/
-│   ├── make_pkg.sh               # ArchLinux package build
-│   └── make_deb.sh               # Debian/Ubuntu package build
-├── PKGBUILD                      # ArchLinux PKGBUILD
-├── LICENSE                        # GPL v3 license
-└── .gitignore                     # Build artifact ignore rules
+│   ├── make_pkg.sh                    # ArchLinux package build
+│   ├── make_deb.sh                    # Debian/Ubuntu package build
+│   └── make_tag.sh                    # Annotated git tag creation
+├── PKGBUILD                            # ArchLinux PKGBUILD
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                     # ShellCheck + bats on push/PR
+│   │   └── release.yml                # Auto-build + publish on tag push
+│   └── dependabot.yml
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+└── LICENSE                             # GPL v3
 ```
 
 ### Code Style
 
-- All scripts use `#!/usr/bin/env bash`
-- Variable naming: `UPPER_CASE_WITH_UNDERSCORES` for globals and constants
-- Functions: `lower_case_with_underscores`
-- Always quote variable expansions (`"$var"` not `$var`)
+- `#!/usr/bin/env bash`
+- Quote all variable expansions (`"$var"`)
 - Validate input at every entry point
-- Use `timeout` for any operation that could hang
-
-### Making Changes
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Make your changes
-4. Test manually with `bash -x penv <command>` for debugging
-5. Submit a Pull Request
-
-### Packaging
-
-The project uses a **Makefile** to orchestrate all packaging workflows. Available targets:
-
-```shell
-make               # Build both ArchLinux and Debian packages
-make pkg           # Build ArchLinux package only
-make deb           # Build Debian package only
-make dist          # Create distribution tarball (penv.tar.gz)
-make install       # Install directly to system
-make clean         # Remove all build artifacts
-make help          # Show all targets and options
-```
-
-You can override the package version:
-
-```shell
-make VERSION=0.2.0 pkg
-```
-
-Or stage an installation to a custom root:
-
-```shell
-make DESTDIR=/tmp/penv-stage install
-```
+- Use `timeout` for operations that could hang
+- Wrap errors with `die()` (prints to stderr, exits 1)
+- All commands self-document via `--help`/`-h`
 
 ---
 
-## Contributing
+## Testing
 
-Contributions are welcome! Here's how you can help:
+The project uses [bats-core](https://github.com/bats-core/bats-core) for testing:
 
-- **Report bugs**: Open an [issue](https://github.com/quintin-lee/penv/issues) with details about the problem
-- **Suggest features**: Open an issue describing your idea
-- **Submit code changes**: Fork the repo and submit a Pull Request
-- **Improve documentation**: Corrections and clarifications are always appreciated
+```shell
+# Run all tests
+make test
 
-### Guidelines
+# Run with shellcheck only
+make test-shellcheck
 
-- Keep scripts POSIX-compatible where possible (but bash extensions are acceptable)
-- Maintain the existing code style and conventions
-- Ensure backward compatibility — avoid breaking existing commands
-- Test your changes on a clean system if possible
+# Run specific test file
+npx bats tests/penv_create.bats
+```
+
+Tests are run automatically in CI (ShellCheck + bats on every push and PR).
 
 ---
 
 ## Troubleshooting
 
-### 1. Permission Issues
+### `penv: command not found`
 
-Ensure you have read and write permissions to `VENV_STORAGE_DIR` (default `~/.cache/python-venv`). Sudo may be needed when packaging `.deb` files.
+Ensure penv is in your `PATH`:
 
-### 2. Command Not Found
+```shell
+which penv
+# → /usr/local/bin/penv
+```
 
-- Ensure `penv` is in your `PATH`, or run with `./penv`
-- After installing via package manager, restart your shell
+### `penv doctor` shows failures
 
-### 3. Virtual Environment Creation Failed
+Run diagnostics for a full system check:
 
-- Check that `python3` and the `venv` module are installed:
-  ```shell
-  python3 -m venv --help
-  ```
-- Ensure sufficient disk space
+```shell
+penv doctor
+```
 
-### 4. No Response After Activation
+Common issues:
+- **expect not installed**: Install via your package manager (`apt install expect`, `pacman -S expect`)
+- **VENV_STORAGE_DIR not writable**: Check permissions or set a custom path via `penv config set storage_dir`
+- **Stale activation markers**: Run `penv clean` or `penv prune`
 
-- `penv deactivate` or `penv clean` to reset
-- Check if the sub-shell is waiting for input (type `exit`)
+### No response after activation
 
-### 5. Auto-activation Not Working
+The sub-shell is waiting for input — type `exit` or `penv deactivate` to return.
 
-- Ensure `penv-auto-activate.sh` is sourced in your shell profile
-- Verify a `.penv` file exists in the project directory
-- Check that the bound environment still exists
+### Broken environment
 
-### 6. Other Issues
+```shell
+penv doctor                          # identify broken envs
+penv prune                           # remove them interactively
+penv prune --force                   # remove without confirmation
+```
 
-- Check the [Issues](https://github.com/quintin-lee/penv/issues) page for similar reports
-- If not found, submit a new issue describing your problem, steps to reproduce, and system information
+### Need more help
+
+[Open an issue](https://github.com/quintin-lee/penv/issues) with steps to reproduce and `penv doctor` output.
+
+---
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Key points:
+
+- **Bug reports**: Open an issue with steps to reproduce
+- **Feature requests**: Open an issue describing your idea
+- **Code changes**: Fork → feature branch → PR
+- **Documentation**: Corrections and clarifications appreciated
+
+The project follows [Conventional Commits](https://www.conventionalcommits.org/) and all code must pass ShellCheck (`--severity=warning`) and the bats test suite.
 
 ---
 
 ## License
 
-This project is licensed under the GNU General Public License — see the [LICENSE](LICENSE) file for details.
+GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -464,8 +466,9 @@ This project is licensed under the GNU General Public License — see the [LICEN
 
 | Version | Date | Highlights |
 |---|---|---|
-| **0.1.2** | 2025-12-17 | clone, requirements, project, usage commands; security hardening; performance optimizations |
-| **0.1.1** | 2025-09-01 | bash completion, `--version`, sorting/filtering, error handling improvements |
+| **0.2.0** | 2026-07-16 | 15 new commands (init/info/config/rename/doc/prune/plugin/tree/export/import/upgrade), direnv+fzf integration, Release CI, dynamic dispatch, fish completion, self-documenting `--help`, 93 bats tests |
+| **0.1.2** | 2025-12-17 | clone, requirements, project, usage; security hardening; VERSION unification; ShellCheck CI; die() error handling |
+| **0.1.1** | 2025-09-01 | bash completion, `--version`, sorting/filtering improvements |
 | **0.1.0** | 2024 | Initial release — create, list, remove, activate, deactivate, clean |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
