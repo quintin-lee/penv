@@ -13,6 +13,8 @@ All notable changes to penv will be documented in this file.
 
 - `penv help` output now groups commands into categories (Lifecycle, Activation, Information, Dependencies, Project, Archive, Maintenance)
 - `penv list` usage updated to show `--json` option
+- `penv` command dispatch is now dynamic: any executable `scripts/penv-<cmd>.sh` is automatically available as `penv <cmd>` — no case pattern registration required
+- `penv help` for script-backed commands is also dynamic: automatically forwards to `<cmd> --help`
 
 ### Fixed
 
