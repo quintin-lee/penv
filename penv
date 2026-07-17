@@ -71,8 +71,10 @@ function usage()
     echo "  import        Restore a virtual environment from archive."
     echo "                Usage: penv import <archive> [new_name]"
     echo ""
-    echo "Maintenance:"
-    echo "  config        Manage penv configuration."
+echo "Maintenance:"
+                echo "  init          One-command setup (completion, profile, service)."
+                echo "                Usage: penv init [--yes]"
+                echo "  config        Manage penv configuration."
     echo "                Usage: penv config [list|get|set]"
     echo "  prune         Remove broken virtual environments."
     echo "                Usage: penv prune [--force]"
@@ -110,6 +112,7 @@ function usage()
     echo "  penv export myproject myproject-venv.tar.gz"
     echo "  penv import myproject-venv.tar.gz"
     echo "  penv upgrade"
+    echo "  penv init --yes"
     echo ""
     echo "For command-specific help, use: penv help <command>"
     exit 1
@@ -361,6 +364,25 @@ function command_help()
             echo "Example:"
             echo "  penv plugin list"
             ;;
+        init)
+            echo "Usage: penv init [--yes]"
+            echo ""
+            echo "One-command penv initialization."
+            echo ""
+            echo "Sets up:"
+            echo "  - Shell completion for the current shell"
+            echo "  - Shell profile with auto-activation hook"
+            echo "  - systemd service (auto-clean daemon)"
+            echo "  - Plugin directory"
+            echo "  - Configuration file"
+            echo ""
+            echo "Options:"
+            echo "  --yes, -y   Non-interactive mode (apply all changes)"
+            echo ""
+            echo "Example:"
+            echo "  penv init"
+            echo "  penv init --yes"
+            ;;
         tree)
             echo "Usage: penv tree <env_name>"
             echo ""
@@ -432,7 +454,7 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin|tree|export|import|upgrade)
+    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin|tree|export|import|upgrade|init)
         script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"

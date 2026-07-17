@@ -7,6 +7,7 @@ All notable changes to penv will be documented in this file.
 ### Added
 
 - `penv list --json` — machine-readable JSON output with env details, total count, storage path, and currently active env
+- `penv init [--yes]` — one-command setup with shell completion, profile hook, systemd service, plugin directory, and default config
 
 ### Changed
 
@@ -15,7 +16,10 @@ All notable changes to penv will be documented in this file.
 
 ### Fixed
 
-_No unreleased changes yet._
+- `/tmp` hardcoded temp file replaced with `mktemp` in `penv create`
+- pip errors no longer silenced (`2>/dev/null` removed from `penv requirements`)
+- `CURRENT_ENV` self-assignment replaced with proper `.activate` marker parsing in `penv show`
+- Unbounded `find` limited with `-maxdepth 3` in `penv project list`
 
 ## [0.2.0] - 2026-07-16
 
