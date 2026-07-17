@@ -16,7 +16,7 @@
 
 VERSION := $(shell cat VERSION 2>/dev/null)
 # Allow command-line override: make VERSION=x.y.z
-VERSION ?= 0.1.2
+VERSION ?= 0.2.0
 DESTDIR ?=
 
 .PHONY: all pkg deb dist install clean clean-pkg clean-deb help

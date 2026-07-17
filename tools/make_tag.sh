@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
 #
-# make_tag.sh — Create a git tag from the VERSION file
+# make_tag.sh — Release automation: sync versions, commit, tag
 #
-# This is the single entry point for creating release tags.
-# The VERSION file is the single source of truth — the tag
-# name is derived from it automatically.
+# Single entry point for creating releases. Run after bumping VERSION:
+#
+#   echo "0.3.0" > VERSION
+#   ./tools/make_tag.sh
+#
+# What it does:
+#   1. Reads VERSION (single source of truth, must already be bumped)
+#   2. Syncs all static version references across codebase + docs
+#   3. Stages + commits the version bump
+#   4. Creates an annotated git tag v<VERSION>
 #
 # Usage: ./tools/make_tag.sh [--dry-run]
 #
 # Options:
-#   --dry-run   Print what would be done without doing it
+#   --dry-run   Print what would be done without making changes
 
 set -euo pipefail
 
-# Unified error handler
-die() {
-    echo "ERROR: $*" >&2
-    exit 1
-}
+die() { echo "ERROR: $*" >&2; exit 1; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_FILE="$SCRIPT_DIR/VERSION"
-PKGBUILD_FILE="$SCRIPT_DIR/PKGBUILD"
 DRY_RUN=false
 
 if [[ "${1:-}" == "--dry-run" ]]; then
@@ -40,18 +42,89 @@ if [[ -z "$VERSION" ]]; then
     die "VERSION file is empty"
 fi
 
-# Validate semver-ish format (X.Y.Z or X.Y)
+# Validate semver (X.Y or X.Y.Z)
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     die "'$VERSION' is not a valid version number (expected X.Y.Z or X.Y)"
 fi
 
 TAG="v$VERSION"
-
-echo "==> VERSION file: $VERSION"
-echo "==> Tag to create: $TAG"
+echo "==> VERSION: $VERSION"
+echo "==> Tag:     $TAG"
 echo ""
 
-# ── 2. Check git state ──────────────────────────────────────
+# ── 2. Sync static version references ───────────────────────
+
+echo "--- Syncing version references ---"
+
+UPDATED_FILES=()
+
+# File list: path → sed expression (captures current version to replace)
+declare -A SYNC
+# shellcheck disable=SC2016
+SYNC=(
+    ["penv"]='s/^    VERSION="[0-9.]*"$/    VERSION="'$VERSION'"/'
+    ["PKGBUILD"]='s/^pkgver="[0-9.]*"$/pkgver="'$VERSION'"/'
+    ["Makefile"]='s/^VERSION ?= [0-9.]*$/VERSION ?= '"$VERSION"'/'
+    ["tools/make_deb.sh"]='s/|| echo "[0-9.]*"$/|| echo "'$VERSION'"/'
+)
+
+for FILE in "${!SYNC[@]}"; do
+    FILE_PATH="$SCRIPT_DIR/$FILE"
+    if [[ ! -f "$FILE_PATH" ]]; then
+        echo "  SKIP: $FILE (not found)"
+        continue
+    fi
+
+    PATTERN="${SYNC[$FILE]}"
+
+    # Check if file already has the correct version
+    # (run sed and see if anything changed)
+    NEW_CONTENT=$(sed "$PATTERN" "$FILE_PATH" 2>/dev/null)
+
+    if [[ "$NEW_CONTENT" == "$(cat "$FILE_PATH")" ]]; then
+        echo "  OK:   $FILE (already $VERSION)"
+    else
+        if $DRY_RUN; then
+            echo "  NEED: $FILE (would update to $VERSION)"
+        else
+            # Use platform-safe sed
+            if [[ "$(uname -s)" == "Darwin" ]]; then
+                sed -i '' "$PATTERN" "$FILE_PATH"
+            else
+                sed -i "$PATTERN" "$FILE_PATH"
+            fi
+            echo "  DONE: $FILE -> $VERSION"
+        fi
+        UPDATED_FILES+=("$FILE")
+    fi
+done
+
+# ── 3. Sync README badge (special case) ──────────────────────
+
+README="$SCRIPT_DIR/README.md"
+if [[ -f "$README" ]]; then
+    # Extract current version from badge URL
+    CURRENT_BADGE_VER=$(sed -n 's/.*version-\([0-9.]*\)-blue.*/\1/p' "$README" | head -1)
+    if [[ -n "$CURRENT_BADGE_VER" && "$CURRENT_BADGE_VER" != "$VERSION" ]]; then
+        if $DRY_RUN; then
+            echo "  NEED: README.md badge ($CURRENT_BADGE_VER -> $VERSION)"
+        else
+            if [[ "$(uname -s)" == "Darwin" ]]; then
+                sed -i '' "s/version-[0-9.]*-blue/version-$VERSION-blue/" "$README"
+            else
+                sed -i "s/version-[0-9.]*-blue/version-$VERSION-blue/" "$README"
+            fi
+            echo "  DONE: README.md badge -> $VERSION"
+        fi
+        UPDATED_FILES+=("README.md")
+    else
+        echo "  OK:   README.md badge (already $VERSION)"
+    fi
+fi
+
+echo ""
+
+# ── 4. Check git state ──────────────────────────────────────
 
 cd "$SCRIPT_DIR"
 
@@ -59,11 +132,21 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     die "Not inside a git repository"
 fi
 
-if [[ -n "$(git status --porcelain)" ]]; then
-    echo "WARNING: You have uncommitted changes:"
+# warn about unrelated dirty files
+UNRELATED_DIRTY=false
+while IFS= read -r line; do
+    f="${line:3}"  # strip "M " or "?? " prefix
+    skip=false
+    for u in "${UPDATED_FILES[@]}"; do
+        [[ "$f" == "$u" ]] && skip=true && break
+    done
+    $skip || { UNRELATED_DIRTY=true; break; }
+done < <(git status --porcelain)
+
+if $UNRELATED_DIRTY; then
+    echo "WARNING: You have uncommitted changes outside version files:"
     git status --short
     echo ""
-    echo "It is recommended to commit all changes before tagging."
     echo -n "Proceed anyway? [y/N] "
     read -r CONFIRM
     if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
@@ -72,10 +155,10 @@ if [[ -n "$(git status --porcelain)" ]]; then
     fi
 fi
 
-# ── 3. Check for existing tag ───────────────────────────────
+# ── 5. Check for existing tag ───────────────────────────────
 
 if git tag -l | grep -qxF "$TAG"; then
-    echo "ERROR: Tag '$TAG' already exists:"
+    echo "Tag '$TAG' already exists:"
     git log --oneline -1 "$TAG" 2>/dev/null || true
     echo ""
     echo -n "Delete existing tag and recreate? [y/N] "
@@ -93,34 +176,28 @@ if git tag -l | grep -qxF "$TAG"; then
     fi
 fi
 
-# ── 4. Sync PKGBUILD pkgver if needed ───────────────────────
+# ── 6. Stage and commit version bump (if any updates) ───────
 
-if [[ -f "$PKGBUILD_FILE" ]]; then
-    CURRENT_PKGVER="$(grep -E '^pkgver=' "$PKGBUILD_FILE" | sed 's/^pkgver=//' | tr -d '"')"
-    if [[ "$CURRENT_PKGVER" != "$VERSION" ]]; then
-        echo "NOTE: PKGBUILD pkgver=$CURRENT_PKGVER, VERSION=$VERSION"
-        echo -n "Update PKGBUILD pkgver to $VERSION? [Y/n] "
-        read -r CONFIRM
-        if [[ -z "$CONFIRM" || "$CONFIRM" =~ ^[Yy]$ ]]; then
-            if $DRY_RUN; then
-                echo "  (dry-run) sed -i 's/^pkgver=.*/pkgver=$VERSION/' PKGBUILD"
-            else
-                if [[ "$(uname -s)" == "Darwin" ]]; then
-                    sed -i '' "s/^pkgver=.*/pkgver=\"$VERSION\"/" "$PKGBUILD_FILE"
-                else
-                    sed -i "s/^pkgver=.*/pkgver=\"$VERSION\"/" "$PKGBUILD_FILE"
-                fi
-                echo "Updated PKGBUILD pkgver -> $VERSION."
-            fi
-        fi
+echo ""
+echo "--- Version bump ---"
+
+if [[ ${#UPDATED_FILES[@]} -gt 0 ]]; then
+    if $DRY_RUN; then
+        echo "  (dry-run) git add ${UPDATED_FILES[*]}"
+        echo "  (dry-run) git commit -m \"chore: bump version to v$VERSION\""
     else
-        echo "OK: PKGBUILD pkgver is already $VERSION."
+        git add "${UPDATED_FILES[@]}"
+        git commit -m "chore: bump version to v$VERSION"
+        echo "  Committed: chore: bump version to v$VERSION"
+        echo "  Files: ${UPDATED_FILES[*]}"
     fi
+else
+    echo "  No version files needed updating."
 fi
 
 echo ""
 
-# ── 5. Summary and confirm ──────────────────────────────────
+# ── 7. Summary and confirm tag ──────────────────────────────
 
 echo "========================================"
 echo "  Tag:     $TAG"
@@ -135,7 +212,7 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# ── 6. Create tag ───────────────────────────────────────────
+# ── 8. Create tag ───────────────────────────────────────────
 
 if $DRY_RUN; then
     echo "  (dry-run) git tag -a '$TAG' -m 'chore: release v$VERSION'"
@@ -144,9 +221,12 @@ else
     git tag -a "$TAG" -m "chore: release v$VERSION"
     echo "Created tag '$TAG'."
     echo ""
-    echo "To push it:"
+    echo "To push tag:"
     echo "  git push origin $TAG"
     echo ""
-    echo "To remove it:"
+    echo "To push tag + commits:"
+    echo "  git push origin master --tags"
+    echo ""
+    echo "To remove tag (local):"
     echo "  git tag -d $TAG"
 fi
