@@ -39,7 +39,8 @@ fi
 
 SELECTED_PYTHON=""
 # Call select_python_version.sh script and capture output with timeout
-if timeout 30s "${SCRIPT_DIR}/select_version.sh" > /tmp/penv_select_output.$$ 2>&1; then
+TMPFILE=$(mktemp /tmp/penv_select.XXXXXX 2>/dev/null) || die "Failed to create temp file"
+if timeout 30s "${SCRIPT_DIR}/select_version.sh" > "$TMPFILE" 2>&1; then
     while IFS= read -r LINE
     do
         if [[ -f ${LINE} ]]
@@ -52,11 +53,11 @@ if timeout 30s "${SCRIPT_DIR}/select_version.sh" > /tmp/penv_select_output.$$ 2>
             continue
         fi
         echo "$LINE"
-    done < /tmp/penv_select_output.$$
-    rm -f /tmp/penv_select_output.$$
+    done < "$TMPFILE"
+    rm -f "$TMPFILE"
 else
     echo "Error: Timeout or error occurred during Python version selection. Using default python3."
-    rm -f /tmp/penv_select_output.$$
+    rm -f "$TMPFILE"
 fi
 
 # Check if a Python version was selected

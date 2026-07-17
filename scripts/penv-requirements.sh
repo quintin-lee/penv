@@ -37,7 +37,7 @@ fi
 case "$OPERATION" in
     export)
         echo "Exporting requirements from virtual environment '$VIRTUAL_ENV_NAME' to '$REQUIREMENTS_FILE'..."
-        if "$PYTHON_PATH" -m pip freeze > "$REQUIREMENTS_FILE" 2>/dev/null; then
+        if "$PYTHON_PATH" -m pip freeze > "$REQUIREMENTS_FILE"; then
             echo "Requirements exported successfully to '$REQUIREMENTS_FILE'."
         else
             die "Failed to export requirements. Make sure pip is available in the environment."
@@ -48,7 +48,7 @@ case "$OPERATION" in
             die "Requirements file '$REQUIREMENTS_FILE' does not exist."
         fi
         echo "Installing requirements from '$REQUIREMENTS_FILE' to virtual environment '$VIRTUAL_ENV_NAME'..."
-        if "$PYTHON_PATH" -m pip install -r "$REQUIREMENTS_FILE" 2>/dev/null; then
+        if "$PYTHON_PATH" -m pip install -r "$REQUIREMENTS_FILE"; then
             echo "Requirements installed successfully."
         else
             die "Failed to install requirements from '$REQUIREMENTS_FILE'."
