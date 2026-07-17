@@ -58,6 +58,14 @@ function usage()
                 echo "                Usage: penv prune [--force]"
                 echo "  plugin        List installed plugins."
                 echo "                Usage: penv plugin [list]"
+                echo "  tree          Show package dependency tree."
+                echo "                Usage: penv tree <env_name>"
+                echo "  export        Archive a virtual environment."
+                echo "                Usage: penv export <env_name> [output_file]"
+                echo "  import        Restore a virtual environment from archive."
+                echo "                Usage: penv import <archive> [new_name]"
+                echo "  upgrade       Self-update penv from GitHub."
+                echo "                Usage: penv upgrade"
                 echo "  help, -h, --help    Displays this help message."
     echo "                Usage: penv help [command]"
     echo "  --version     Display version information."
@@ -82,6 +90,10 @@ function usage()
     echo "  penv doctor"
     echo "  penv prune"
     echo "  penv plugin list"
+    echo "  penv tree myproject"
+    echo "  penv export myproject myproject-venv.tar.gz"
+    echo "  penv import myproject-venv.tar.gz"
+    echo "  penv upgrade"
     echo ""
     echo "For command-specific help, use: penv help <command>"
     exit 1
@@ -331,6 +343,64 @@ function command_help()
             echo "Example:"
             echo "  penv plugin list"
             ;;
+        tree)
+            echo "Usage: penv tree <env_name>"
+            echo ""
+            echo "Display package dependency tree for a virtual environment."
+            echo ""
+            echo "If pipdeptree is installed in the environment, a full"
+            echo "dependency tree is shown. Otherwise, a flat alphabetical"
+            echo "list of installed packages is displayed."
+            echo ""
+            echo "Example:"
+            echo "  penv tree myproject"
+            ;;
+        export)
+            echo "Usage: penv export <env_name> [output_file]"
+            echo ""
+            echo "Archive a virtual environment as a gzipped tarball."
+            echo ""
+            echo "Arguments:"
+            echo "  env_name      Name of the virtual environment to export"
+            echo "  output_file   Output archive path (default: <env_name>.tar.gz)"
+            echo ""
+            echo "The archive includes environment metadata (version, python,"
+            echo "export date) for reliable import."
+            echo ""
+            echo "Example:"
+            echo "  penv export myproject my-backup.tar.gz"
+            ;;
+        import)
+            echo "Usage: penv import <archive> [new_name]"
+            echo ""
+            echo "Restore a virtual environment from a tarball."
+            echo ""
+            echo "Arguments:"
+            echo "  archive       Path to the archive file (.tar.gz)"
+            echo "  new_name      Optional new name for the environment"
+            echo ""
+            echo "If new_name is not provided, the original environment name"
+            echo "from the archive metadata (or filename) is used."
+            echo ""
+            echo "Imported environments are validated for integrity."
+            echo ""
+            echo "Example:"
+            echo "  penv import my-backup.tar.gz"
+            echo "  penv import my-backup.tar.gz renamed-env"
+            ;;
+        upgrade)
+            echo "Usage: penv upgrade"
+            echo ""
+            echo "Self-update penv to the latest GitHub release."
+            echo ""
+            echo "Checks the current version against the latest release,"
+            echo "downloads and installs the update automatically."
+            echo ""
+            echo "Requires: curl, write access to install directory"
+            echo ""
+            echo "Example:"
+            echo "  penv upgrade"
+            ;;
         *)
             die "Unknown command: '$cmd'. Use 'penv help' to see available commands."
             ;;
@@ -344,7 +414,7 @@ fi
 
 cmd=$1
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin)
+    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin|tree|export|import|upgrade)
         script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
         if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
             "$script_path" "${@:2}"

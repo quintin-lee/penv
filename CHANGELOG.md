@@ -20,7 +20,12 @@ All notable changes to penv will be documented in this file.
 - `penv remove` (no args) — interactive fzf multi-select picker when `fzf` is installed
 - `.github/workflows/release.yml` — Release CI: tag push builds Arch/DEB packages and publishes GitHub Release
 - `tests/penv_doctor.bats`, `tests/penv_prune.bats`, `tests/penv_plugin.bats`, `tests/penv_project.bats`, `tests/penv_activate.bats` — test expansion
-- Total tests: 68 (up from 22 in initial bats suite)
+- `penv tree <env>` — show package dependency tree (pipdeptree or flat list fallback)
+- `penv export <env> [file]` — archive environment as a gzipped tarball with metadata
+- `penv import <archive> [name]` — restore environment from archive with path fixing
+- `penv upgrade` — self-update from GitHub Releases (detects install type, auto-downloads)
+- `tests/penv_tree.bats`, `tests/penv_export.bats`, `tests/penv_import.bats`, `tests/penv_upgrade.bats` — 16 new test cases
+- Total tests: 84 (up from 22 in initial bats suite)
 - `tools/make_tag.sh` — script to create annotated git tags from `VERSION` file
 - Makefile with targets: `all`, `pkg`, `deb`, `dist`, `install`, `clean`, `help`
 - `.github/workflows/ci.yml` — ShellCheck + bash syntax check on push and PR
