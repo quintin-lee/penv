@@ -161,15 +161,17 @@ then
 fi
 
 cmd=$1
+
+# Dynamic dispatch: any executable scripts/penv-<cmd>.sh is a valid command.
+# No need to register new commands in a case pattern — just drop a script in.
+script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
+if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
+    "$script_path" "${@:2}"
+    exit $?
+fi
+
+# Built-in commands that are NOT backed by a script file
 case "$cmd" in
-    create|list|remove|activate|show|deactivate|clean|clone|requirements|project|usage|info|config|rename|doctor|prune|plugin|tree|export|import|upgrade|init)
-        script_path="${SCRIPT_DIR}/scripts/${SCRIPT_NAME}-${cmd}.sh"
-        if [[ -f "$script_path" && -r "$script_path" && -x "$script_path" ]]; then
-            "$script_path" "${@:2}"
-        else
-            die "Command script '$script_path' not found or not executable."
-        fi
-        ;;
     help|-h|--help)
         if [ $# -gt 1 ]; then
             command_help "${@:2}"
