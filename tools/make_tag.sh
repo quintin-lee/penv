@@ -192,9 +192,9 @@ if [[ -f "$CHANGELOG" ]]; then
                 echo "$RELEASED_CONTENT" | head -20
             else
                 if [[ "$(uname -s)" == "Darwin" ]]; then
-                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
                 else
-                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
                 fi
                 echo "  DONE: CHANGELOG.md — released $VERSION ($RELEASE_DATE)"
                 echo "  Content preview:"
@@ -205,9 +205,9 @@ if [[ -f "$CHANGELOG" ]]; then
             echo "  OK:   CHANGELOG.md (no unreleased changes, adding empty $VERSION section)"
             if ! $DRY_RUN; then
                 if [[ "$(uname -s)" == "Darwin" ]]; then
-                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
                 else
-                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
                 fi
             fi
             UPDATED_FILES+=("CHANGELOG.md")
