@@ -10,8 +10,9 @@
 # What it does:
 #   1. Reads VERSION (single source of truth, must already be bumped)
 #   2. Syncs all static version references across codebase + docs
-#   3. Stages + commits the version bump
-#   4. Creates an annotated git tag v<VERSION>
+#   3. Transforms CHANGELOG: moves [Unreleased] into a versioned section
+#   4. Stages + commits the version bump
+#   5. Creates an annotated git tag v<VERSION>
 #
 # Usage: ./tools/make_tag.sh [--dry-run]
 #
@@ -122,9 +123,69 @@ if [[ -f "$README" ]]; then
     fi
 fi
 
+# ── 4. Sync CHANGELOG (special case) ─────────────────────────
+
+CHANGELOG="$SCRIPT_DIR/CHANGELOG.md"
+RELEASE_DATE=$(date +%F)
+
+if [[ -f "$CHANGELOG" ]]; then
+    # Find the [Unreleased] section
+    UNRELEASED_LINE=$(grep -n '^## \[Unreleased\]' "$CHANGELOG" | head -1 | cut -d: -f1)
+
+    if [[ -n "$UNRELEASED_LINE" ]]; then
+        # Find the next version header after [Unreleased]
+        NEXT_HEADER_LINE=$(tail -n +"$((UNRELEASED_LINE + 1))" "$CHANGELOG" | grep -n '^## \[' | head -1 | cut -d: -f1)
+
+        if [[ -z "$NEXT_HEADER_LINE" ]]; then
+            # No next header found (last section in file)
+            NEXT_HEADER_LINE=$(wc -l < "$CHANGELOG")
+        fi
+
+        # Content exists if there are non-blank lines between Unreleased and next header
+        CONTENT_LINES=$((NEXT_HEADER_LINE - UNRELEASED_LINE - 1))
+        HAS_CONTENT=false
+        if (( CONTENT_LINES > 1 )); then
+            HAS_CONTENT=true
+        fi
+
+        if $HAS_CONTENT; then
+            # Preview the content being released
+            RELEASED_CONTENT=$(head -n "$((UNRELEASED_LINE + NEXT_HEADER_LINE - 1))" "$CHANGELOG" | tail -n "$((NEXT_HEADER_LINE - 1))" | sed 's/^/  /')
+
+            if $DRY_RUN; then
+                echo "  NEED: CHANGELOG.md — would release $VERSION ($RELEASE_DATE)"
+                echo "  Content preview:"
+                echo "$RELEASED_CONTENT" | head -20
+            else
+                if [[ "$(uname -s)" == "Darwin" ]]; then
+                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                else
+                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                fi
+                echo "  DONE: CHANGELOG.md — released $VERSION ($RELEASE_DATE)"
+                echo "  Content preview:"
+                echo "$RELEASED_CONTENT" | head -20
+            fi
+            UPDATED_FILES+=("CHANGELOG.md")
+        else
+            echo "  OK:   CHANGELOG.md (no unreleased changes, adding empty $VERSION section)"
+            if ! $DRY_RUN; then
+                if [[ "$(uname -s)" == "Darwin" ]]; then
+                    sed -i '' "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                else
+                    sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $RELEASE_DATE/" "$CHANGELOG"
+                fi
+            fi
+            UPDATED_FILES+=("CHANGELOG.md")
+        fi
+    else
+        echo "  SKIP: CHANGELOG.md (no [Unreleased] section found)"
+    fi
+fi
+
 echo ""
 
-# ── 4. Check git state ──────────────────────────────────────
+# ── 5. Check git state ──────────────────────────────────────
 
 cd "$SCRIPT_DIR"
 
@@ -155,7 +216,7 @@ if $UNRELATED_DIRTY; then
     fi
 fi
 
-# ── 5. Check for existing tag ───────────────────────────────
+# ── 6. Check for existing tag ───────────────────────────────
 
 if git tag -l | grep -qxF "$TAG"; then
     echo "Tag '$TAG' already exists:"
@@ -176,7 +237,7 @@ if git tag -l | grep -qxF "$TAG"; then
     fi
 fi
 
-# ── 6. Stage and commit version bump (if any updates) ───────
+# ── 7. Stage and commit version bump (if any updates) ───────
 
 echo ""
 echo "--- Version bump ---"
@@ -197,7 +258,7 @@ fi
 
 echo ""
 
-# ── 7. Summary and confirm tag ──────────────────────────────
+# ── 8. Summary and confirm tag ──────────────────────────────
 
 echo "========================================"
 echo "  Tag:     $TAG"
@@ -212,7 +273,7 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# ── 8. Create tag ───────────────────────────────────────────
+# ── 9. Create tag ───────────────────────────────────────────
 
 if $DRY_RUN; then
     echo "  (dry-run) git tag -a '$TAG' -m 'chore: release v$VERSION'"
